@@ -69,15 +69,21 @@ const PostSchema = new Schema({
 });
 
 export const UserSchema = new Schema({
-  _id: {
+  username: {
     type: String,
     required: true,
     unique: true,
   },
-  name: {
+  password: {
     type: String,
     required: true,
-    unique: true,
+  },
+  avatar: {
+    type: String,
+    required: true,
+  },
+  bio: {
+    type: String,
   },
   createdAt: {
     type: Date,
@@ -93,5 +99,9 @@ export const UserSchema = new Schema({
     type: [PostSchema],
     required: true,
     default: [],
+  },
+  salt: {
+    type: String,
+    required: true,
   },
 });
