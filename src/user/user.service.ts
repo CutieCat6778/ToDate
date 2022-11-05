@@ -1,8 +1,12 @@
-import { CreateUserDto, FindUserDto, UpdateUserDto } from './../dto/user.dto';
-import { UserInterface, ResponseInterface } from './../types/user';
+import { FindUserDto, UpdateUserDto } from './../dto/user.dto';
+import {
+  UserInterface,
+  ResponseInterface,
+  SensoredResponseInterface,
+  SensoredUserInterface,
+} from './../types/user';
 import { Inject, Injectable } from '@nestjs/common';
 import { Model } from 'mongoose';
-import { HashPassword } from '../utils/user';
 
 @Injectable()
 export class UserService {
@@ -11,61 +15,24 @@ export class UserService {
     private userModel: Model<UserInterface>,
   ) {}
 
-  async create(createUserDto: CreateUserDto): Promise<ResponseInterface> {
-    try {
-      const user = await this.userModel.findOne({
-        username: createUserDto.username,
-      });
-
-      if (user) {
-        return {
-          success: false,
-          status: 500,
-          name: 'Username already existed!',
-        };
-      }
-
-      const { salt, hash } = HashPassword(createUserDto.password);
-
-      const dto = {
-        ...createUserDto,
-        password: hash,
-        salt: salt,
-      };
-
-      const createdUser = new this.userModel(dto);
-
-      await createdUser.save();
-
-      const res: ResponseInterface = {
-        success: true,
-        status: 200,
-        name: 'Successfully created a new user!',
-        user: createdUser,
-      };
-
-      return res;
-    } catch (e) {
-      console.error(e);
-      return {
-        success: false,
-        status: 500,
-        name: 'Internal Service Error',
-      };
-    }
-  }
-
-  async findUser(findUserDto: FindUserDto): Promise<ResponseInterface> {
-    const user = await this.userModel.findOne({
+  async findUser(findUserDto: FindUserDto): Promise<SensoredResponseInterface> {
+    const doc: any = await this.userModel.findOne({
       username: findUserDto.username,
     });
+
+    const user = doc._doc;
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { _id, password, salt, refreshToken, __v, ...sensoredUser } = user;
+
+    const res: SensoredUserInterface = sensoredUser;
 
     return user
       ? {
           success: true,
           status: 200,
           name: 'Found a user!',
-          user,
+          user: res,
         }
       : {
           success: false,

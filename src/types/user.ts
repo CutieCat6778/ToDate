@@ -27,11 +27,21 @@ export interface UserInterface {
   username: string;
   password: string;
   avatar: string;
-  bio: string;
+  bio?: string;
   createdAt: DateInterface;
   calendar: DateInterface;
   posts: PostInterface;
   salt: string;
+  refreshToken?: string;
+}
+
+export interface SensoredUserInterface {
+  username: string;
+  avatar: string;
+  bio?: string;
+  createdAt: DateInterface;
+  calendar: DateInterface;
+  posts: PostInterface;
 }
 
 export interface ErrorInterface {
@@ -39,9 +49,23 @@ export interface ErrorInterface {
   code: number;
 }
 
+export interface TokenInterface {
+  accessToken?: string;
+  refreshToken?: string;
+}
+
 export interface ResponseInterface {
   success: boolean;
   status: number;
   name: string;
   user?: UserInterface;
+  token?: TokenInterface;
+}
+
+export interface SensoredResponseInterface {
+  success: boolean;
+  status: number;
+  name: string;
+  user?: SensoredUserInterface;
+  token?: TokenInterface;
 }

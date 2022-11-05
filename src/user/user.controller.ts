@@ -1,5 +1,5 @@
 import { UpdateUserDto } from './../dto/user.dto';
-import { ResponseInterface } from './../types/user';
+import { ResponseInterface, SensoredResponseInterface } from './../types/user';
 import {
   Body,
   Controller,
@@ -7,38 +7,34 @@ import {
   NotFoundException,
   UseGuards,
   Request,
+  Param,
+  Patch,
+  Post,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { CreateUserDto, FindUserDto } from '../dto/user.dto';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { AccessTokenGuard } from '../auth/guards/accessToken.guard';
 
 @Controller('user')
 export class UserController {
   constructor(private service: UserService) {}
 
-  @UseGuards(JwtAuthGuard)
-  @Get('findUser')
-  async findUser(@Body() findUserDto: FindUserDto): Promise<ResponseInterface> {
-    return this.service.findUser(findUserDto);
+  @Get(':username')
+  async findUser(
+    @Param('username') username: string,
+  ): Promise<SensoredResponseInterface> {
+    return this.service.findUser({ username });
   }
 
-  @Get('createUser')
-  async createUser(
-    @Body() createUserDto: CreateUserDto,
-  ): Promise<ResponseInterface> {
-    return this.service.create(createUserDto);
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Get('updateUser')
+  @UseGuards(AccessTokenGuard)
+  @Patch('updateUser')
   async updateUser(
     @Body() updateUserDto: UpdateUserDto,
   ): Promise<ResponseInterface> {
     return this.service.updateUser(updateUserDto);
   }
 
-  @UseGuards(JwtAuthGuard)
-  @Get('@me')
+  @UseGuards(AccessTokenGuard)
+  @Post('@me')
   profile(@Request() req) {
     return req.user;
   }

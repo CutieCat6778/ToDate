@@ -15,6 +15,14 @@ export function HashPassword(password): PasswordResponse {
   return { salt, hash };
 }
 
+export function HashRefreshToken(password, salt): string {
+  const hash = crypto
+    .pbkdf2Sync(password, salt, 1000, 64, `sha512`)
+    .toString(`hex`);
+
+  return hash;
+}
+
 export function ValidatePassword(password, salt, hashedPassword): boolean {
   const hash = crypto
     .pbkdf2Sync(password, salt, 1000, 64, `sha512`)
