@@ -7,12 +7,15 @@ export default function useUser({
   redirectTo = "",
   redirectIfFound = false,
   accessToken = "",
+  refreshToken = "",
 } = {}) {
   const fetcher = async (url: string) => {
     try {
       const { data } = await axios.post(
         url,
-        {},
+        {
+          name: "thinh",
+        },
         {
           headers: {
             Authorization: "Bearer " + accessToken,
@@ -20,7 +23,7 @@ export default function useUser({
         }
       );
 
-      console.log(data)
+      console.log(data);
 
       return data;
     } catch (e) {
@@ -34,17 +37,18 @@ export default function useUser({
   );
 
   useEffect(() => {
-    if (!redirectTo || !user) return;
+    if (!user && refreshToken) {
+      const { pathname } = Router;
+      if(pathname != "refresh") Router.push("/refresh");
+    }
 
-    console.log(user);
+    console.log("Fetched", user);
 
-    if (
-      (redirectTo && !redirectIfFound && !user?.isLoggedIn) ||
-      (redirectIfFound && user?.isLoggedIn)
-    ) {
+    if (redirectTo && redirectIfFound) {
       Router.push(redirectTo);
     }
-  }, [user, redirectIfFound, redirectTo]);
+    if (!redirectTo || !user) return;
+  }, [user, redirectIfFound, redirectTo, refreshToken]);
 
   return { user, mutateUser };
 }

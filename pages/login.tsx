@@ -3,22 +3,21 @@ import LoginForm from "../components/Form";
 import fetchJson, { FetchError } from "../lib/fetchJson";
 import useUser from "../lib/useUser";
 import { useCookies } from "react-cookie";
-import { parseCookies } from "../lib/cookie";
 import { SensoreUserData } from "../lib/rest.api";
 
 export default function Login({ data }: any) {
-  let token = "";
+  let refreshToken = "";
   let userInfo = "";
   let expiresAt = "";
 
   if (typeof window !== "undefined") {
-    token = localStorage.getItem("refreshToken") || "";
+    refreshToken = localStorage.getItem("refreshToken") || "";
     userInfo = localStorage.getItem("userInfo") || "";
     expiresAt = localStorage.getItem("expiresAt") || "";
   }
 
   const [authState, setAuthState] = useState({
-    token,
+    token: refreshToken,
     expiresAt,
     userInfo: userInfo ? JSON.parse(userInfo) : {},
   });
@@ -35,12 +34,13 @@ export default function Login({ data }: any) {
     });
   };
 
-  const [accessToken, setAccessToken] = useCookies(["accessToken"]);
+  const [accessToken, setAccessToken, removeAccessToken] = useCookies(["accessToken"]);
 
   const { mutateUser } = useUser({
     redirectTo: "/home",
     redirectIfFound: true,
     accessToken: accessToken.accessToken,
+    refreshToken: authState.token,
   });
 
   const [errorMessage, setErrorMessage] = useState<string>("");
@@ -76,9 +76,8 @@ export default function Login({ data }: any) {
               }
 
               setAccessToken("accessToken", data.token.accessToken, {
-                secure: true,
                 maxAge: 900,
-                httpOnly: true,
+                path: "/",
               });
 
               setAuthInfo({
@@ -101,11 +100,3 @@ export default function Login({ data }: any) {
     </div>
   );
 }
-
-Login.getInitialProps = async ({ req, res }: any) => {
-  const data = parseCookies(req);
-
-  return {
-    data: data && data,
-  };
-};
