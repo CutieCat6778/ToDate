@@ -60,6 +60,7 @@ export interface ResponseInterface {
   name: string;
   user?: UserInterface;
   token?: TokenInterface;
+  isLoggedIn: boolean;
 }
 
 export interface SensoredResponseInterface {
@@ -68,4 +69,5 @@ export interface SensoredResponseInterface {
   name: string;
   user?: SensoredUserInterface;
   token?: TokenInterface;
+  isLoggedIn: boolean;
 }

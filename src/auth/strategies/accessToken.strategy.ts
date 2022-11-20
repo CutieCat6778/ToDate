@@ -11,12 +11,13 @@ export class AccessTokenStrategy extends PassportStrategy(Strategy) {
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
       secretOrKey: jwtConstants.secret,
+      passReqToCallback: true,
     });
   }
 
   async validate(req: Request, payload: any) {
     console.log(req);
-    const refreshToken = req.get('Authorization').replace('Bearer', '').trim();
-    return { ...payload, refreshToken };
+    const accessToken = req.get('Authorization').replace('Bearer', '').trim();
+    return { ...payload, accessToken };
   }
 }

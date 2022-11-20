@@ -1,5 +1,4 @@
 import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Model } from 'mongoose';
 import { CreateUserDto } from 'src/dto/user.dto';
@@ -17,7 +16,6 @@ export class AuthService {
     @Inject('USER_MODEL')
     private userModel: Model<UserInterface>,
     private jwtService: JwtService,
-    private configService: ConfigService,
   ) {}
 
   async refreshTokens(userId: string, refreshToken: string) {
@@ -80,6 +78,7 @@ export class AuthService {
         name: 'Successfully created a new user!',
         user: createdUser,
         token: tokens,
+        isLoggedIn: false,
       };
 
       return res;
@@ -160,6 +159,7 @@ export class AuthService {
       name: 'Successfully loged in!',
       user: user,
       token: tokens,
+      isLoggedIn: true,
     };
   }
 }

@@ -33,11 +33,13 @@ export class UserService {
           status: 200,
           name: 'Found a user!',
           user: res,
+          isLoggedIn: false,
         }
       : {
           success: false,
           status: 404,
           name: 'User not found!',
+          isLoggedIn: false,
         };
   }
 
@@ -49,6 +51,7 @@ export class UserService {
           success: false,
           status: 500,
           name: 'User not found!',
+          isLoggedIn: true,
         };
       } else if (user) {
         await this.userModel.updateOne(
@@ -60,6 +63,7 @@ export class UserService {
           success: true,
           status: 200,
           name: 'Updated user successfully',
+          isLoggedIn: true,
         };
       }
     } catch (e) {
@@ -67,6 +71,7 @@ export class UserService {
         success: false,
         status: 500,
         name: 'Internal Server Error',
+        isLoggedIn: true,
       };
     }
   }
