@@ -8,6 +8,7 @@ import { upperDirectiveTransformer } from './common/directives/upper-case.direct
 import { DirectiveLocation, GraphQLDirective } from 'graphql';
 import { AppResolver } from './app.resolver';
 import { UserModule } from './user/user.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { UserModule } from './user/user.module';
         ],
       },
     }),
+    AuthModule,
   ],
   providers: [AppService, AppResolver],
 })

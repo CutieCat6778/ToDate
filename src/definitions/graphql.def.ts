@@ -50,11 +50,22 @@ export class User {
 }
 
 export class SensoredUser {
+    _id: string;
     username: string;
     email: string;
     biography?: Nullable<string>;
     avatar?: Nullable<string>;
     dates?: Nullable<Date[]>;
+}
+
+export class Tokens {
+    accessToken: string;
+    refreshToken: string;
+}
+
+export class UserRes {
+    user: User;
+    tokens: Tokens;
 }
 
 export abstract class IQuery {
@@ -63,12 +74,18 @@ export abstract class IQuery {
     abstract getUserById(_id: string): SensoredUser | Promise<SensoredUser>;
 
     abstract getUserByName(username: string): SensoredUser | Promise<SensoredUser>;
+
+    abstract login(username: string, password: string): UserRes | Promise<UserRes>;
+
+    abstract logout(): boolean | Promise<boolean>;
+
+    abstract refreshToken(): UserRes | Promise<UserRes>;
 }
 
 export abstract class IMutation {
     abstract updateUser(updateUser: UpdateUserArgs): User | Promise<User>;
 
-    abstract createUser(createUser: CreateUserArgs): User | Promise<User>;
+    abstract signup(createUser: CreateUserArgs): UserRes | Promise<UserRes>;
 }
 
 type Nullable<T> = T | null;

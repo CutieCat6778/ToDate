@@ -30,6 +30,7 @@ type User {
 
 """sensoredUser"""
 type SensoredUser {
+  _id: String!
   username: String!
   email: String!
   biography: String
@@ -37,15 +38,30 @@ type SensoredUser {
   dates: [Date!]
 }
 
+"""Tokens"""
+type Tokens {
+  accessToken: String!
+  refreshToken: String!
+}
+
+"""returned User"""
+type UserRes {
+  user: User!
+  tokens: Tokens!
+}
+
 type Query {
   sayHello: String!
   getUserById(_id: String!): SensoredUser!
   getUserByName(username: String!): SensoredUser!
+  login(username: String!, password: String!): UserRes!
+  logout: Boolean!
+  refreshToken: UserRes!
 }
 
 type Mutation {
   updateUser(updateUser: UpdateUserArgs!): User!
-  createUser(createUser: CreateUserArgs!): User!
+  signup(createUser: CreateUserArgs!): UserRes!
 }
 
 input UpdateUserArgs {

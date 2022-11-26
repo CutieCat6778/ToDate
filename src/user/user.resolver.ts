@@ -6,7 +6,8 @@ import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { UserService } from './user.service';
 import { User, SensoredUser } from 'src/model/user.model';
 import { GetUserIdArgs, GetUserNameArgs } from 'src/dto/user.args';
-import { NotFoundException } from '@nestjs/common';
+import { NotFoundException, UseGuards } from '@nestjs/common';
+import { GqlAccessTokenAuthGuard } from 'src/auth/guards/accessToken.guard';
 
 @Resolver((of) => User)
 export class UserResolver {
@@ -14,9 +15,6 @@ export class UserResolver {
 
   @Query((returns) => SensoredUser)
   async getUserById(@Args() args: GetUserIdArgs) {
-
-    return new NotFoundException();
-
     const user = await this.service.getUserById(args);
 
     if (!user) {
@@ -52,6 +50,7 @@ export class UserResolver {
   }
 
   @Mutation((returns) => User)
+  @UseGuards(GqlAccessTokenAuthGuard)
   async updateUser(
     @Args('updateUser') args: UpdateUserArgs
   ) {
@@ -59,21 +58,6 @@ export class UserResolver {
 
     if(!user) {
       throw new NotFoundException();
-    }
-
-    return user;
-  }
-
-  @Mutation((returns) => User)
-  async createUser(
-    @Args('createUser') args: CreateUserArgs
-  ) {
-    console.log(args);
-
-    const user = await this.service.createUser(args)
-
-    if(!user) {
-      throw new NotFoundException()
     }
 
     return user;

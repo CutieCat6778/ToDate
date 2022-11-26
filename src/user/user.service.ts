@@ -5,7 +5,7 @@ import { User } from 'src/definitions/graphql.def';
 import { Model } from 'mongoose';
 import { GetUserIdArgs } from 'src/dto/user.args';
 import { HashPassword } from 'src/common/utils/hash.utils';
-import { Document } from 'mongoose'
+import { Document } from 'mongoose';
 
 @Injectable()
 export class UserService {
@@ -13,6 +13,18 @@ export class UserService {
     @Inject('USER_MODEL')
     private userModel: Model<User & Document>,
   ) {}
+
+  async findOne(filter: any) {
+    return this.userModel.findOne(filter);
+  }
+
+  async updateOne(filter: any, data: any) {
+    return this.userModel.updateOne(filter, data);
+  }
+
+  async findById(id: String) {
+    return this.userModel.findById(id);
+  }
 
   async getUserById(args: GetUserIdArgs) {
     return this.userModel.findOne({ _id: args._id });
@@ -32,27 +44,13 @@ export class UserService {
     return this.userModel.updateOne({ username: query }, { ...data });
   }
 
-  async createUser(args: CreateUserArgs) {
-    const userExist = await this.userModel.findOne({ username: args.username });
-
-    if (userExist) return null;
-
-    const { salt, hash } = HashPassword(args.password);
-
-    const data = {
-      ...args,
-      password: hash,
-      salt: salt,
-    };
-
+  async createUser(data: any) {
     try {
       const user = new this.userModel(data);
-
       await user.save();
-
       return user;
     } catch (e) {
-      if (e) throw e;
+      throw e;
     }
   }
 }

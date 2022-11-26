@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Field, Int, ObjectType } from '@nestjs/graphql';
 
-@ObjectType({ description: "date" })
+@ObjectType({ description: 'date' })
 export class Date {
   @Field((type) => Int)
   _id: number;
@@ -22,7 +22,7 @@ export class Date {
   cancelled: boolean;
 }
 
-@ObjectType({ description: "user" })
+@ObjectType({ description: 'user' })
 export class User {
   @Field((type) => String)
   _id: string;
@@ -55,8 +55,11 @@ export class User {
   dates: Date[];
 }
 
-@ObjectType({ description: "sensoredUser" })
+@ObjectType({ description: 'sensoredUser' })
 export class SensoredUser {
+  @Field((type) => String)
+  _id: String;
+
   @Field((type) => String)
   username: string;
 
@@ -71,4 +74,22 @@ export class SensoredUser {
 
   @Field((type) => [Date], { nullable: true })
   dates?: Date[];
+}
+
+@ObjectType({ description: 'Tokens' })
+export class Tokens {
+  @Field((type) => String)
+  accessToken: string;
+
+  @Field((type) => String)
+  refreshToken: string;
+}
+
+@ObjectType({ description: 'returned User' })
+export class UserRes {
+  @Field((type) => User)
+  user: User;
+
+  @Field((type) => Tokens)
+  tokens: Tokens;
 }
