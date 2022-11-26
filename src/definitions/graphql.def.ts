@@ -75,6 +75,8 @@ export abstract class IQuery {
 
     abstract getUserByName(username: string): SensoredUser | Promise<SensoredUser>;
 
+    abstract me(): User | Promise<User>;
+
     abstract login(username: string, password: string): UserRes | Promise<UserRes>;
 
     abstract logout(): boolean | Promise<boolean>;

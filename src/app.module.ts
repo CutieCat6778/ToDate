@@ -1,3 +1,5 @@
+import { LoggingPlugin } from './common/plugins/logging.plugins';
+import { ComplexityPlugin } from './common/plugins/complexy.plugin';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { Module } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
@@ -35,6 +37,6 @@ import { AuthModule } from './auth/auth.module';
     }),
     AuthModule,
   ],
-  providers: [AppService, AppResolver],
+  providers: [AppService, AppResolver, ComplexityPlugin, LoggingPlugin],
 })
 export class AppModule {}

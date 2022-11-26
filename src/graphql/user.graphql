@@ -54,6 +54,7 @@ type Query {
   sayHello: String!
   getUserById(_id: String!): SensoredUser!
   getUserByName(username: String!): SensoredUser!
+  me: User!
   login(username: String!, password: String!): UserRes!
   logout: Boolean!
   refreshToken: UserRes!
