@@ -1,53 +1,68 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+directive @upper on FIELD_DEFINITION
+
+"""date"""
 type Date {
-  id: Int!
+  _id: Int!
   title: String!
   time: Int!
   createdAt: Int!
-  inviters: [ID!]!
+  inviters: [String!]
   cancelled: Boolean!
 }
 
+"""user"""
 type User {
-  id: ID!
+  _id: String!
   username: String!
   password: String!
   email: String!
-  biography: String!
-  avatar: String!
+  biography: String
+  avatar: String
   createdAt: Int!
   salt: String!
   refreshToken: String!
   dates: [Date!]!
-} 
+}
 
+"""sensoredUser"""
 type SensoredUser {
   username: String!
   email: String!
-  biography: String!
-  avatar: String!
-  dates: [Date!]!
+  biography: String
+  avatar: String
+  dates: [Date!]
 }
 
 type Query {
-  getUser(id: ID!): SensoredUser
+  sayHello: String!
+  getUserById(_id: String!): SensoredUser!
+  getUserByName(username: String!): SensoredUser!
 }
 
 type Mutation {
-  updateUser(
-    username: String!
-    email: String!
-    biography: String!
-    avatar: String!
-    password: String!
-    salt: String!
-    refreshToken: String!
-  ): User
+  updateUser(updateUser: UpdateUserArgs!): User!
+  createUser(createUser: CreateUserArgs!): User!
+}
 
-  createUser(
-    username: String!
-    email: String!
-    password: String!
-    salt: String!
-    refreshToken: String!
-  ): User
+input UpdateUserArgs {
+  query: String!
+  username: String
+  password: String
+  email: String
+  biography: String
+  avatar: String
+  salt: String
+  refreshToken: String
+}
+
+input CreateUserArgs {
+  username: String!
+  password: String!
+  email: String!
+  biography: String
+  avatar: String
 }
