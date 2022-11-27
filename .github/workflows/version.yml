@@ -3,7 +3,7 @@ name: Graphql
 on:
   push:
     branches:
-      - graohql
+      - graphql
 
 jobs:
   version:
