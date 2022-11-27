@@ -6,6 +6,7 @@ import { AuthService } from './auth.service';
 import { UserRes } from 'src/model/user.model';
 import { CreateUserArgs } from 'src/dto/user.input';
 import { LoginArgs } from 'src/dto/auth.args';
+import { GqlRefreshTokenAuthGuard } from './guards/refreshToken.guard';
 
 @Resolver()
 export class AuthResolver {
@@ -28,7 +29,9 @@ export class AuthResolver {
   }
 
   @Query((returns) => UserRes)
+  @UseGuards(GqlRefreshTokenAuthGuard)
   async refreshToken(@CurrentUser() user) {
+    console.log(user);
     const userId = user['sub'];
     const refreshToken = user['refreshToken'];
     return this.authService.refreshTokens(userId, refreshToken);

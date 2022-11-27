@@ -18,6 +18,7 @@ export class GqlRefreshTokenStrategy extends PassportStrategy(
   }
 
   validate(req: Request, payload: any) {
+    console.log("Token", req);
     const refreshToken = req.get('Authorization').replace('Bearer', '').trim();
     return { ...payload, refreshToken };
   }

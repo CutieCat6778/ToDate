@@ -6,9 +6,10 @@ import { AuthResolver } from './auth.resolver';
 import { JwtModule } from '@nestjs/jwt';
 import Constants from './constants'
 import { GqlAccessTokenStrategy } from './strategies/accessToken';
+import { GqlRefreshTokenStrategy } from './strategies/refreshToken';
 
 @Module({
-  providers: [AuthService, AuthResolver, GqlAccessTokenStrategy],
+  providers: [AuthService, AuthResolver, GqlAccessTokenStrategy, GqlRefreshTokenStrategy],
   imports: [
     UserModule,
     PassportModule,
