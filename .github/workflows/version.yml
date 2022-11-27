@@ -1,4 +1,4 @@
-name: Graphql version updater
+name: Graphql
 
 on:
   push:
