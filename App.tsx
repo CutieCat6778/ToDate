@@ -1,9 +1,25 @@
 import React from "react";
-import { ApolloClient, InMemoryCache, ApolloProvider } from "@apollo/client";
+import { ApolloClient, InMemoryCache, ApolloProvider, createHttpLink } from "@apollo/client";
 import Router from "./pages/router";
+import { setContext } from '@apollo/client/link/context';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+const httpLink = createHttpLink({
+  uri: 'http://192.168.178.2:5000/graphql',
+});
+
+const authLink = setContext(async (_, { headers }) => {
+  const token = await AsyncStorage.getItem('@access_token');
+  return {
+    headers: {
+      ...headers,
+      authorization: token ? `Bearer ${token}` : "",
+    }
+  }
+});
 
 const client = new ApolloClient({
-  uri: "http://192.168.178.2:5000/graphql",
+  link: authLink.concat(httpLink),
   cache: new InMemoryCache(),
 });
 export default function App() {
@@ -13,12 +29,3 @@ export default function App() {
     </ApolloProvider>
   );
 }
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     backgroundColor: "#fff",
-//     alignItems: "center",
-//     justifyContent: "center",
-//   },
-// });

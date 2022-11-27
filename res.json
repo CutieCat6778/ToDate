@@ -1,0 +1,15 @@
+{
+  "login": {
+    "__typename": "UserRes",
+    "tokens": {
+      "__typename": "Tokens",
+      "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MzgyMzhhMjExNjc3YWMzZDJmYWY4NWMiLCJ1c2VybmFtZSI6InR4emplIiwiaWF0IjoxNjY5NTQ3MDA0LCJleHAiOjE2Njk1NDc5MDR9.AuID-Vjq9A_kHzuW0kq3Cu7dGzsj32Dr4hyhfFMAifM",
+      "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MzgyMzhhMjExNjc3YWMzZDJmYWY4NWMiLCJ1c2VybmFtZSI6InR4emplIiwiaWF0IjoxNjY5NTQ3MDA0LCJleHAiOjE2NzAxNTE4MDR9.fTz9zHRAzswje6KxmD_tpDeSZfGy4b3aUNCklOAiz6w"
+    },
+    "user": {
+      "__typename": "User",
+      "email": "thinh@thinh.tech",
+      "username": "txzje"
+    }
+  }
+}
