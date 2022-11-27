@@ -1,4 +1,4 @@
-name: Mobile version updater
+name: Mobile
 
 on:
   push:
