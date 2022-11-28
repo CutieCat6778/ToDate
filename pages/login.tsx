@@ -35,35 +35,36 @@ export default function Login({ route, navigation }: any) {
     disableQuery: route.params?.redirected ? route.params.redirected : false,
   });
 
-  const [loadData, { called, loading, data, error }] = useLazyQuery(
-    LoginGQL,
-    {
-      variables: {
-        username: loginInfo.username,
-        password: loginInfo.password,
-      },
-    }
-  );
+  const [loadData, { called, loading, data, error }] = useLazyQuery(LoginGQL, {
+    variables: {
+      username: loginInfo.username,
+      password: loginInfo.password,
+    },
+  });
 
   useEffect(() => {
     if (called && !loading && !trigger) {
       if (!data) {
-        if (errorMessage == "") _setErrorMessage("Incorrect login informations");
+        if (errorMessage == "")
+          _setErrorMessage("Incorrect login informations");
       } else if (data) {
         _setTrigger(true);
-        if(errorMessage != "") _setErrorMessage("");
-        const user: UserRes = data.login;
-        AsyncStorage.setItem("@access_token", user.tokens.accessToken);
-        AsyncStorage.setItem("@refresh_token", user.tokens.refreshToken);
-        AsyncStorage.setItem(
-          "@expires_at",
-          `${new Date().getTime() + 604800000}`
-        );
-        AsyncStorage.setItem("@user_info", JSON.stringify(user.user));
-        navigation.navigate("Home", { redirected: true });
+        if (errorMessage != "") _setErrorMessage("");
+        async function redirectToHome() {
+          const user: UserRes = data.login;
+          await AsyncStorage.setItem("@access_token", user.tokens.accessToken);
+          await AsyncStorage.setItem("@refresh_token", user.tokens.refreshToken);
+          await AsyncStorage.setItem(
+            "@expires_at",
+            `${new Date().getTime() + 604800000}`
+          );
+          await AsyncStorage.setItem("@user_info", JSON.stringify(user.user));
+          navigation.navigate("Home", { redirected: true, user: user.user });
+        }
+        redirectToHome();
       }
     }
-  }, [called, loading, trigger, data, errorMessage, navigation])
+  }, [called, loading, trigger, data, errorMessage, navigation]);
   interface FormData {
     username: string;
     password: string;

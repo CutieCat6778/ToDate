@@ -1,3 +1,4 @@
+import { User } from "./../types/graphql";
 import { useLazyQuery, useQuery } from "@apollo/client";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
@@ -12,14 +13,6 @@ interface IProps {
   origin?: string;
 }
 
-export function Refresh(
-  navigate: Function,
-  loadData: Function,
-  loading: boolean,
-  data: any,
-  called: boolean
-) {}
-
 export default function useUser({
   redirectTo,
   redirectIfFound,
@@ -29,29 +22,50 @@ export default function useUser({
   origin,
 }: IProps) {
   const [refreshToken, _setRefreshToken] = useState("_");
+  const [accessToken, _setAccessToken] = useState("_");
 
   async function ReadData() {
-    const token = await AsyncStorage.getItem("@refresh_token");
+    const refreshT = await AsyncStorage.getItem("@refresh_token");
+    const accessT = await AsyncStorage.getItem("@access_token");
 
-    _setRefreshToken(token || "");
+    _setRefreshToken(refreshT || "");
+    _setAccessToken(accessT || "");
   }
 
   useEffect(() => {
     if (refreshToken == "_") ReadData();
   });
 
-  const { data, loading, error, refetch } = useQuery(GetSelfGQL);
-
-  const [loadData, { called, data: data1, loading: loading1, error: error1 }] =
-    useLazyQuery(RefreshToken, {
+  const [queryUser, { called, data, loading, error }] = useLazyQuery(
+    GetSelfGQL,
+    {
       context: {
         headers: {
-          authorization: `Bearer ${refreshToken}`,
+          authorization: `Bearer ${accessToken}`,
         },
       },
-    });
+    }
+  );
 
-  const user: LoginRes = data?.me;
+  const [
+    loadData,
+    { called: called1, data: data1, loading: loading1, error: error1 },
+  ] = useLazyQuery(RefreshToken, {
+    context: {
+      headers: {
+        authorization: `Bearer ${refreshToken}`,
+      },
+    },
+  });
+
+  if (disableQuery) return null;
+  else if (accessToken == "") {
+    navigate && (origin != "Login" && origin != "Register")
+      ? navigate("Login", { redirected: true })
+      : null;
+  } else if (!called && accessToken.length > 2) queryUser();
+
+  const user: User = data?.me;
 
   if (returnLoggedIn) {
     if (!loading) {
@@ -72,17 +86,18 @@ export default function useUser({
         loaded: false,
       };
     }
-  } else if (navigate && !disableQuery && refreshToken != "_") {
+  }
+  if (navigate && refreshToken != "_") {
     if (!loading && !user && refreshToken) {
-      if(!called) loadData();
+      if (!called1) loadData();
 
-      if (called && !loading1) {
+      if (called1 && !loading1) {
         if (data) {
           const tokens: Tokens = data.refreshToken.tokens;
           AsyncStorage.setItem("@access_token", tokens.accessToken);
           AsyncStorage.setItem("@refresh_token", tokens.refreshToken);
-          if(origin != "Home") navigate("Home", { redirected: true });
-        } else if (!data && origin != "Login") {
+          if (origin != "Home") navigate("Home", { redirected: true });
+        } else if (!data && (origin != "Login" && origin != "Register")) {
           navigate("Login", { redirected: true });
         }
       }
@@ -92,9 +107,9 @@ export default function useUser({
           return navigate(redirectTo, { redirected: true });
         }
         return {
-          user: user,
+          user: user?.username ? user : {},
           loaded: true,
-        }
+        };
       } else if (
         !loading &&
         !user &&
@@ -107,18 +122,21 @@ export default function useUser({
     if (error) {
       if (
         error.message == "Unauthorized" &&
-        origin != "Login" &&
-        origin != "Register"
+        (origin != "Login" && origin != "Register")
       )
         return navigate("Login", { redirected: true });
       else if (
         error.message == "Unauthorized" &&
         (origin == "Login" || origin == "Register")
-      )
+      ) {
         return null;
-      else {
+      } else {
         throw error;
       }
     }
-  } else return new Error("Unknown error!");
+  } else {
+    return {
+      loaded: false,
+    };
+  }
 }

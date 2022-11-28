@@ -1,17 +1,31 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import useUser from "../lib/useUser";
 
 export default function Home({ route, navigation }: any) {
   const [param, _setParam] = useState(route.param);
+  const [trigger, _setTrigger] = useState(false);
+  const [user, _setUser] = useState(route.param?.user);
+  const [{ user: user1, loaded }, _setData] = useState({
+    user: {},
+    loaded: false,
+  })
 
-  const { user, loaded } = useUser({
+  const res = useUser({
     origin: "Home",
     navigate: navigation.navigate,
     disableQuery: param ? param.redirected : false,
   });
 
-  if(loaded) {
+  useEffect(() => {
+    if(!trigger) {
+      if(res && res.loaded) _setData(res);
+      if(!user && (loaded && user1)) _setUser(user1); 
+      if(loaded) _setTrigger(true);
+    }
+  }, [loaded, res, trigger, user, user1])
+
+  if(loaded && user) {
     return (
       <View style={styles.container}>
         <TouchableOpacity
@@ -26,16 +40,21 @@ export default function Home({ route, navigation }: any) {
         </Text>
       </View>
     );
-  } else {
+  } else if(!loaded || !user) {
     return (
-      <View>
+      <View style={styles.container}>
         <Text>
           Loading...
         </Text>
       </View>
     )
+  } else {
+    return (
+      <View style={styles.container}>
+        <Text>Error!</Text>
+      </View>
+    )
   }
-  
 }
 
 const styles = StyleSheet.create({

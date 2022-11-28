@@ -12,6 +12,7 @@ const Stack = createNativeStackNavigator();
 
 export default function Router() {
   const { loggedIn, loaded } = useUser({
+    origin: "Router",
     returnLoggedIn: true,
     disableQuery: false,
   });
