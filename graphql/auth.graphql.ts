@@ -17,6 +17,27 @@ export const LoginGQL = gql`
   }
 `;
 
+export const RegisterGQL = gql`
+  mutation Register($username: String!, $password: String!, $email: String!) {
+    signup(createUser: {
+      username: $username,
+      password: $password,
+      email: $email
+    }) {
+      user {
+        username
+        email
+        biography
+        avatar
+      }
+      tokens {
+        accessToken
+        refreshToken
+      }
+    }
+  }
+`;
+
 export const GetSelfGQL = gql`
   query {
     me {

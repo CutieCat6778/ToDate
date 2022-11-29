@@ -14,17 +14,70 @@ import {
 import SizedBox from "../components/SizedBox";
 import useUser from "../lib/useUser";
 import { Controller, useForm } from "react-hook-form";
+import { useLazyQuery, useMutation } from "@apollo/client";
+import { RegisterGQL } from "../graphql/auth.graphql";
+import { UserRes } from "../types/graphql";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import ValidationBox, { check } from "../components/ValidationChecker";
 
 export default function Register({ route, navigation }: any) {
-  const [params, _setParam] = useState(route.params);
+  const [trigger, _setTrigger] = useState(false);
+  const [errorMessage, _setErrorMessage] = useState("");
+  const [info, _setInfo] = useState({
+    username: "",
+    password: "",
+    email: "",
+  });
+
+  const [register, { loading, data, error }] = useMutation(RegisterGQL, {
+    variables: {
+      username: info.username,
+      password: info.password,
+      email: info.email,
+    },
+  });
 
   useUser({
     origin: route.name,
     redirectTo: "Home",
     redirectIfFound: true,
     navigate: navigation.navigate,
-    disableQuery: params?.redirected ? params.redirected : false,
+    disableQuery: route.params?.redirected ? route.params.redirected : false,
   });
+
+  useEffect(() => {
+    if (!loading && !trigger) {
+      if (error) {
+        _setErrorMessage(error.message);
+      }
+      if (!data) {
+        if (errorMessage != "") {
+          console.log(error?.stack);
+          _setErrorMessage("Incorrect login informations");
+        }
+      } else if (data) {
+        console.log(data);
+        _setTrigger(true);
+        if (errorMessage != "") _setErrorMessage("");
+        async function redirectToHome() {
+          const user: UserRes = data.signup;
+          await AsyncStorage.setItem("@access_token", user.tokens.accessToken);
+          await AsyncStorage.setItem(
+            "@refresh_token",
+            user.tokens.refreshToken
+          );
+          await AsyncStorage.setItem(
+            "@expires_at",
+            `${new Date().getTime() + 604800000}`
+          );
+          await AsyncStorage.setItem("@user_info", JSON.stringify(user.user));
+          navigation.navigate("Home", { redirected: true, user: user.user });
+        }
+        redirectToHome();
+      }
+    }
+  }, [loading, trigger, data, errorMessage, navigation, error]);
+
   interface FormData {
     username: string;
     password: string;
@@ -39,8 +92,13 @@ export default function Register({ route, navigation }: any) {
     },
   });
 
-  const onSubmit = handleSubmit(({ username, password }) => {
-    Alert.alert("Data", `Username: ${username}\nPassword: ${password}`);
+  const onSubmit = handleSubmit(({ username, password, email }) => {
+    _setInfo({
+      username,
+      password,
+      email,
+    });
+    register();
   });
 
   return (
@@ -56,22 +114,35 @@ export default function Register({ route, navigation }: any) {
 
           <TouchableOpacity
             onPress={() => {
-              navigation.navigate("Login");
+              navigation.navigate("Login", { redirected: true });
             }}
           >
-            <Text style={styles.subtitle}>Already have an account?</Text>
+            <Text style={styles.subtitle}>Login to your account!</Text>
           </TouchableOpacity>
+
+          {errorMessage == "" ? null : errorMessage != "user" &&
+            errorMessage != "password" ? (
+            <View>
+              <SizedBox height={8} />
+              <Text style={styles.error}> {errorMessage} </Text>
+            </View>
+          ) : (
+            <View>
+              <SizedBox height={8} />
+              <ValidationBox data={errorMessage} />
+            </View>
+          )}
 
           <SizedBox height={32} />
 
           <Pressable>
-            <View style={styles.form}>
-              <Text style={styles.label}>Username</Text>
+            <Controller
+              control={control}
+              name="username"
+              render={({ field: { onBlur, onChange, value } }) => (
+                <View style={styles.form}>
+                  <Text style={styles.label}>Username</Text>
 
-              <Controller
-                control={control}
-                name="username"
-                render={({ field: { onBlur, onChange, value } }) => (
                   <TextInput
                     autoCapitalize="none"
                     autoComplete="username"
@@ -83,21 +154,20 @@ export default function Register({ route, navigation }: any) {
                     textContentType="username"
                     value={value}
                   />
-                )}
-              />
-            </View>
+                </View>
+              )}
+            />
           </Pressable>
 
           <SizedBox height={16} />
 
           <Pressable>
-            <View style={styles.form}>
-              <Text style={styles.label}>Email</Text>
-
-              <Controller
-                control={control}
-                name="email"
-                render={({ field: { onBlur, onChange, value } }) => (
+            <Controller
+              control={control}
+              name="email"
+              render={({ field: { onBlur, onChange, value } }) => (
+                <View style={styles.form}>
+                  <Text style={styles.label}>Email</Text>
                   <TextInput
                     autoCapitalize="none"
                     autoComplete="email"
@@ -109,21 +179,20 @@ export default function Register({ route, navigation }: any) {
                     textContentType="emailAddress"
                     value={value}
                   />
-                )}
-              />
-            </View>
+                </View>
+              )}
+            />
           </Pressable>
 
           <SizedBox height={16} />
 
           <Pressable>
-            <View style={styles.form}>
-              <Text style={styles.label}>Password</Text>
-
-              <Controller
-                control={control}
-                name="password"
-                render={({ field: { onBlur, onChange, value } }) => (
+            <Controller
+              control={control}
+              name="password"
+              render={({ field: { onBlur, onChange, value } }) => (
+                <View style={styles.form}>
+                  <Text style={styles.label}>Password</Text>
                   <TextInput
                     autoCapitalize="none"
                     autoComplete="password"
@@ -137,9 +206,9 @@ export default function Register({ route, navigation }: any) {
                     textContentType="password"
                     value={value}
                   />
-                )}
-              />
-            </View>
+                </View>
+              )}
+            />
           </Pressable>
 
           <SizedBox height={16} />
@@ -214,6 +283,12 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     color: "rgba(235, 235, 245, 0.6)",
+    fontSize: 17,
+    fontWeight: "400",
+    lineHeight: 22,
+  },
+  error: {
+    color: "#B73E3E",
     fontSize: 17,
     fontWeight: "400",
     lineHeight: 22,

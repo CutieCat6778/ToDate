@@ -18,10 +18,15 @@ import { useLazyQuery } from "@apollo/client";
 import { LoginGQL } from "../graphql/auth.graphql";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { UserRes } from "../types/graphql";
+import ValidationBox, {
+  check,
+  PasswordValidationBox,
+  UserValidationBox,
+} from "../components/ValidationChecker";
 
 export default function Login({ route, navigation }: any) {
   const [trigger, _setTrigger] = useState(false);
-  const [errorMessage, _setErrorMessage] = useState("");
+  const [ErrorMessage, _setErrorMessage] = useState<string>("");
   const [loginInfo, _setLoginInfo] = useState({
     username: "",
     password: "",
@@ -44,16 +49,24 @@ export default function Login({ route, navigation }: any) {
 
   useEffect(() => {
     if (called && !loading && !trigger) {
+      if (error) {
+        _setErrorMessage(error.message);
+      }
       if (!data) {
-        if (errorMessage == "")
+        if (ErrorMessage.length > 8) {
+          console.log(ErrorMessage);
           _setErrorMessage("Incorrect login informations");
+        }
       } else if (data) {
         _setTrigger(true);
-        if (errorMessage != "") _setErrorMessage("");
+        if (ErrorMessage != "") _setErrorMessage("");
         async function redirectToHome() {
           const user: UserRes = data.login;
           await AsyncStorage.setItem("@access_token", user.tokens.accessToken);
-          await AsyncStorage.setItem("@refresh_token", user.tokens.refreshToken);
+          await AsyncStorage.setItem(
+            "@refresh_token",
+            user.tokens.refreshToken
+          );
           await AsyncStorage.setItem(
             "@expires_at",
             `${new Date().getTime() + 604800000}`
@@ -64,7 +77,7 @@ export default function Login({ route, navigation }: any) {
         redirectToHome();
       }
     }
-  }, [called, loading, trigger, data, errorMessage, navigation]);
+  }, [called, loading, trigger, data, ErrorMessage, navigation, error]);
   interface FormData {
     username: string;
     password: string;
@@ -96,16 +109,25 @@ export default function Login({ route, navigation }: any) {
 
           <SizedBox height={8} />
 
-          {errorMessage == "" ? (
-            <TouchableOpacity
-              onPress={() => {
-                navigation.navigate("Register", { redirected: true });
-              }}
-            >
-              <Text style={styles.subtitle}>Create an account here!</Text>
-            </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => {
+              navigation.navigate("Register", { redirected: true });
+            }}
+          >
+            <Text style={styles.subtitle}>Create an account here!</Text>
+          </TouchableOpacity>
+
+          {ErrorMessage == "" ? null : ErrorMessage != "user" &&
+            ErrorMessage != "password" ? (
+            <View>
+              <SizedBox height={8} />
+              <Text style={styles.error}> {ErrorMessage} </Text>
+            </View>
           ) : (
-            <Text style={styles.error}> {errorMessage} </Text>
+            <View>
+              <SizedBox height={8} />
+              <ValidationBox data={ErrorMessage} />
+            </View>
           )}
 
           <SizedBox height={32} />

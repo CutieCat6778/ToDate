@@ -4,7 +4,7 @@ import Login from "./login";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import useUser from "../lib/useUser";
-import { View, Text } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import Register from "./register";
 import Logout from "./logout";
 
@@ -34,8 +34,22 @@ export default function Router() {
     );
   } else
     return (
-      <View>
-        <Text>Loading...</Text>
+      <View style={styles.container}>
+        <Text style={styles.subtitle}>Loading...</Text>
       </View>
     );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  subtitle: {
+    fontSize: 17,
+    fontWeight: "400",
+    lineHeight: 22,
+  },
+});

@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useEffect } from "react";
-import { View,  Text } from "react-native";
+import { View,  Text, StyleSheet } from "react-native";
 
 export default function Logout({ navigation }: any) {
   async function RemoveKeys() {
@@ -19,10 +19,23 @@ export default function Logout({ navigation }: any) {
   })
 
   return (
-    <View>
-      <Text>
+    <View style={styles.container}>
+      <Text style={styles.subtitle}>
         Logging out...
       </Text>
     </View>
   )
 }
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  subtitle: {
+    fontSize: 17,
+    fontWeight: "400",
+    lineHeight: 22,
+  },
+});
