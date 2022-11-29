@@ -23,8 +23,6 @@ export class CreateUserArgs {
     username: string;
     password: string;
     email: string;
-    biography?: Nullable<string>;
-    avatar?: Nullable<string>;
 }
 
 export class Date {

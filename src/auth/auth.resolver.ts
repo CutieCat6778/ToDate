@@ -31,7 +31,6 @@ export class AuthResolver {
   @Query((returns) => UserRes)
   @UseGuards(GqlRefreshTokenAuthGuard)
   async refreshToken(@CurrentUser() user) {
-    console.log(user);
     const userId = user['sub'];
     const refreshToken = user['refreshToken'];
     return this.authService.refreshTokens(userId, refreshToken);

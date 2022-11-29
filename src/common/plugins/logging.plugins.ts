@@ -7,6 +7,7 @@ import {
 @Plugin()
 export class LoggingPlugin implements ApolloServerPlugin {
   async requestDidStart(): Promise<GraphQLRequestListener> {
+    console.log(new Date().toTimeString());
     console.log('Request started');
     return {
       async willSendResponse() {

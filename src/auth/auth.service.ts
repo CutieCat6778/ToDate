@@ -4,6 +4,8 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { create } from 'domain';
+import { async } from 'rxjs';
 import {
   HashPassword,
   HashRefreshToken,
@@ -14,6 +16,7 @@ import { LoginArgs } from 'src/dto/auth.args';
 import { CreateUserArgs } from 'src/dto/user.input';
 import { UserService } from 'src/user/user.service';
 import jwtConstants from './constants';
+import { UserRegex, EmailRegex, PasswordRegex } from './regex';
 
 @Injectable()
 export class AuthService {
@@ -90,6 +93,15 @@ export class AuthService {
   }
 
   async login(args: LoginArgs) {
+
+    const { user: user1, password } = this.InfoValidation(args.username, args.password);
+
+    if(!user1) {
+      return new Error("user");
+    } else if(!password) {
+      return new Error("password");
+    }
+
     const res: any = await this.validateUser(args.username, args.password);
 
     if(!res) {
@@ -114,6 +126,17 @@ export class AuthService {
     return true;
   }
 
+  InfoValidation(username: string, password: string, email?: string) {
+    return email ? {
+      user: UserRegex.test(username),
+      password: PasswordRegex.test(password),
+      email: EmailRegex.test(email),
+    } : {
+      user: UserRegex.test(username),
+      password: password == "admin" ? true : PasswordRegex.test(password),
+    }
+  }
+
   async signUp(createUser: CreateUserArgs) {
     try {
       const userExist = await this.userService.findOne({
@@ -122,6 +145,16 @@ export class AuthService {
 
       if (userExist || userExist?.username) {
         return new Error('User existed!');
+      }
+
+      const { user, password, email } = this.InfoValidation(createUser.username, createUser.password, createUser.email);
+
+      if(!user) {
+        return new Error("user");
+      } else if(!password) {
+        return new Error("password");
+      } else if(!email) {
+        return new Error("email");
       }
 
       const { salt, hash } = HashPassword(createUser.password);
@@ -138,8 +171,6 @@ export class AuthService {
         createdUser._id,
         createdUser.username,
       );
-
-      console.log(tokens);
 
       await this.updateRefreshToken(
         createdUser._id,

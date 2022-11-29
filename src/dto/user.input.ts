@@ -46,12 +46,4 @@ export class CreateUserArgs {
 
   @Field((type) => String)
   email: string;
-
-  @Field((type) => String, { nullable: true })
-  @IsOptional()
-  biography?: string;
-
-  @Field((type) => String, { nullable: true })
-  @IsOptional()
-  avatar?: string;
 }
