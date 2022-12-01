@@ -4,14 +4,11 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { create } from 'domain';
-import { async } from 'rxjs';
 import {
   HashPassword,
   HashRefreshToken,
   ValidatePassword,
 } from 'src/common/utils/hash.utils';
-import { User } from 'src/definitions/graphql.def';
 import { LoginArgs } from 'src/dto/auth.args';
 import { CreateUserArgs } from 'src/dto/user.input';
 import { UserService } from 'src/user/user.service';
@@ -27,14 +24,17 @@ export class AuthService {
 
   async refreshTokens(userId: string, refreshToken: string) {
     const user = await this.userService.findById(userId);
-    if (!user || !user.refreshToken)
+    if (!user || !user.refreshToken) {
       throw new ForbiddenException('Access Denied');
+    }
     const refreshTokenMatches = await ValidatePassword(
       user.refreshToken,
       user.salt,
       refreshToken,
     );
-    if (!refreshTokenMatches) throw new ForbiddenException('Access Denied');
+    if (!refreshTokenMatches) {
+      throw new ForbiddenException('Access Denied');
+    }
     const tokens = await this.getTokens(user.id, user.username);
     await this.updateRefreshToken(user.id, tokens.refreshToken, user.salt);
     return tokens;
@@ -111,7 +111,6 @@ export class AuthService {
     const user = res._doc;
     const tokens = await this.getTokens(user._id, user.username);
     await this.updateRefreshToken(user._id, tokens.refreshToken, user.salt);
-
     if (!user || !tokens || !tokens.accessToken || !tokens.refreshToken)
       return new InternalServerErrorException();
 
