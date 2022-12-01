@@ -29,7 +29,7 @@ export default function Register({ route, navigation }: any) {
     email: "",
   });
 
-  const [register, { loading, data, error }] = useMutation(RegisterGQL, {
+  const [register, { called, loading, data, error }] = useMutation(RegisterGQL, {
     variables: {
       username: info.username,
       password: info.password,
@@ -52,11 +52,9 @@ export default function Register({ route, navigation }: any) {
       }
       if (!data) {
         if (errorMessage != "") {
-          console.log(error?.stack);
           _setErrorMessage("Incorrect login informations");
         }
       } else if (data) {
-        console.log(data);
         _setTrigger(true);
         if (errorMessage != "") _setErrorMessage("");
         async function redirectToHome() {
@@ -98,7 +96,7 @@ export default function Register({ route, navigation }: any) {
       password,
       email,
     });
-    register();
+    if(!called) register();
   });
 
   return (

@@ -1,20 +1,42 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, Image, StyleSheet } from "react-native";
 import useUser from "../lib/useUser";
+import Header from "../pageComponents/home/header.home";
+import NavBar from "../pageComponents/home/nav.home";
 
 export default function Home({ route, navigation }: any) {
-  const [param, _setParam] = useState(route.param);
+  const [params, _setParams] = useState(route.params);
   const [trigger, _setTrigger] = useState(false);
-  const [user, _setUser] = useState(route.param?.user);
+  const [user, _setUser] = useState(route.params?.user);
   const [{ user: user1, loaded }, _setData] = useState({
     user: {},
     loaded: false,
   })
 
+  const elseStyles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: "#fff",
+      alignItems: "center",
+      justifyContent: "center",
+      margin: 0,
+    }
+  });
+
+  const styles = StyleSheet.create({
+    container: {
+      backgroundColor: "#000",
+      height: "100%",
+      flex: 1,
+      flexDirection: "column",
+      alignItems: "center"
+    }
+  })
+
   const res = useUser({
-    origin: "Home",
+    origin: route.name,
     navigate: navigation.navigate,
-    disableQuery: param ? param.redirected : false,
+    disableQuery: params ? params.redirected : false,
   });
 
   useEffect(() => {
@@ -28,21 +50,13 @@ export default function Home({ route, navigation }: any) {
   if(loaded && user) {
     return (
       <View style={styles.container}>
-        <TouchableOpacity
-          onPress={() => {
-            navigation.navigate("Logout", { redirected: true });
-          }}
-        >
-          <Text style={styles.subtitle} >Logout from here</Text>
-        </TouchableOpacity>
-        <Text>
-          Hello, {user.username}
-        </Text>
+        <NavBar user={user} navigation={navigation}/>
+        <Header user={user} navigation={navigation}/>
       </View>
     );
   } else if(!loaded || !user) {
     return (
-      <View style={styles.container}>
+      <View style={elseStyles.container}>
         <Text>
           Loading...
         </Text>
@@ -50,23 +64,9 @@ export default function Home({ route, navigation }: any) {
     )
   } else {
     return (
-      <View style={styles.container}>
+      <View style={elseStyles.container}>
         <Text>Error!</Text>
       </View>
     )
   }
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  subtitle: {
-    fontSize: 17,
-    fontWeight: "400",
-    lineHeight: 22,
-  },
-});

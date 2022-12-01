@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import { User } from "./../types/graphql";
 import { useLazyQuery, useQuery } from "@apollo/client";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -21,6 +22,11 @@ export default function useUser({
   disableQuery,
   origin,
 }: IProps) {
+
+  if(disableQuery) return {
+    loaded: true
+  };
+
   const [refreshToken, _setRefreshToken] = useState("_");
   const [accessToken, _setAccessToken] = useState("_");
 
@@ -41,7 +47,7 @@ export default function useUser({
     {
       context: {
         headers: {
-          authorization: `Bearer ${accessToken}`,
+          "Authorization": `Bearer ${accessToken}`,
         },
       },
     }
@@ -53,7 +59,7 @@ export default function useUser({
   ] = useLazyQuery(RefreshToken, {
     context: {
       headers: {
-        authorization: `Bearer ${refreshToken}`,
+        "Authorization": `Bearer ${refreshToken}`,
       },
     },
   });
@@ -87,24 +93,28 @@ export default function useUser({
       };
     }
   }
-  if (navigate && refreshToken != "_") {
-    if (!loading && !user && refreshToken) {
+  if (navigate && refreshToken != "_" && called && !loading) {
+    if (!user && refreshToken && error?.message == "Unauthorized") {
       if (!called1) loadData();
 
       if (called1 && !loading1) {
-        if (data) {
-          const tokens: Tokens = data.refreshToken.tokens;
-          AsyncStorage.setItem("@access_token", tokens.accessToken);
-          AsyncStorage.setItem("@refresh_token", tokens.refreshToken);
-          if (origin != "Home") navigate("Home", { redirected: true });
+        if (data1) {
+          console
+          async function refresh() {
+            const tokens: Tokens = data1.refreshToken.tokens;
+            await AsyncStorage.setItem("@access_token", tokens.accessToken);
+            await AsyncStorage.setItem("@refresh_token", tokens.refreshToken);
+            if (origin != "Home" && navigate) return navigate("Home", { redirected: true, user: data1.user });
+          }
+          refresh();
         } else if (!data && (origin != "Login" && origin != "Register")) {
           navigate("Login", { redirected: true });
         }
       }
-    } else {
-      if (!loading && user) {
+    }else {
+      if (user) {
         if (redirectTo && redirectIfFound && origin != redirectTo) {
-          return navigate(redirectTo, { redirected: true });
+          return navigate(redirectTo, { redirected: true, user: user });
         }
         return {
           user: user?.username ? user : {},
@@ -126,7 +136,7 @@ export default function useUser({
       )
         return navigate("Login", { redirected: true });
       else if (
-        error.message == "Unauthorized" &&
+        error.message != "Unauthorized" &&
         (origin == "Login" || origin == "Register")
       ) {
         return null;
@@ -134,9 +144,5 @@ export default function useUser({
         throw error;
       }
     }
-  } else {
-    return {
-      loaded: false,
-    };
   }
 }

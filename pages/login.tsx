@@ -54,11 +54,9 @@ export default function Login({ route, navigation }: any) {
       }
       if (!data) {
         if (ErrorMessage.length > 8) {
-          console.log(ErrorMessage);
           _setErrorMessage("Incorrect login informations");
         }
       } else if (data) {
-        _setTrigger(true);
         if (ErrorMessage != "") _setErrorMessage("");
         async function redirectToHome() {
           const user: UserRes = data.login;
@@ -74,7 +72,8 @@ export default function Login({ route, navigation }: any) {
           await AsyncStorage.setItem("@user_info", JSON.stringify(user.user));
           navigation.navigate("Home", { redirected: true, user: user.user });
         }
-        redirectToHome();
+        if(!trigger) redirectToHome();
+        _setTrigger(true);
       }
     }
   }, [called, loading, trigger, data, ErrorMessage, navigation, error]);
@@ -95,7 +94,7 @@ export default function Login({ route, navigation }: any) {
       username,
       password,
     });
-    loadData();
+    if(!called) loadData();
   });
 
   return (
