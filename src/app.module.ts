@@ -11,6 +11,8 @@ import { DirectiveLocation, GraphQLDirective } from 'graphql';
 import { AppResolver } from './app.resolver';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
+import { DateModule } from './date/date.module';
+import { ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
   imports: [
@@ -36,6 +38,11 @@ import { AuthModule } from './auth/auth.module';
       },
     }),
     AuthModule,
+    DateModule,
+    ThrottlerModule.forRoot({
+      ttl: 60,
+      limit: 10,
+    })
   ],
   providers: [AppService, AppResolver, ComplexityPlugin, LoggingPlugin],
 })

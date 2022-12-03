@@ -11,6 +11,7 @@ import {
 } from 'src/common/utils/hash.utils';
 import { LoginArgs } from 'src/dto/auth.args';
 import { CreateUserArgs } from 'src/dto/user.input';
+import { Tokens } from 'src/model/user.model';
 import { UserService } from 'src/user/user.service';
 import jwtConstants from './constants';
 import { UserRegex, EmailRegex, PasswordRegex } from './regex';
@@ -22,15 +23,16 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async refreshTokens(userId: string, refreshToken: string) {
+  async refreshTokens(userId: string, refreshToken: string): Promise<Tokens> {
     const user = await this.userService.findById(userId);
     if (!user || !user.refreshToken) {
       throw new ForbiddenException('Access Denied');
     }
+
     const refreshTokenMatches = await ValidatePassword(
-      user.refreshToken,
-      user.salt,
       refreshToken,
+      user.salt,
+      user.refreshToken,
     );
     if (!refreshTokenMatches) {
       throw new ForbiddenException('Access Denied');

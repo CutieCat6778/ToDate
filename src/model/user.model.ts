@@ -7,6 +7,9 @@ export class Date {
   _id: number;
 
   @Field((type) => String)
+  author: string;
+
+  @Field((type) => String)
   title: string;
 
   @Field((type) => Int)
@@ -20,12 +23,18 @@ export class Date {
 
   @Field((type) => Boolean)
   cancelled: boolean;
+
+  @Field((type) => Int)
+  expireIn: number;
 }
 
 @ObjectType({ description: 'user' })
 export class User {
   @Field((type) => String)
   _id: string;
+
+  @Field((type) => String)
+  displayName: string;
 
   @Field((type) => String)
   username: string;
@@ -51,14 +60,17 @@ export class User {
   @Field((type) => String)
   refreshToken: string;
 
-  @Field((type) => [Date])
-  dates: Date[];
+  @Field((type) => [String])
+  dates: string[];
 }
 
 @ObjectType({ description: 'sensoredUser' })
 export class SensoredUser {
   @Field((type) => String)
   _id: String;
+  
+  @Field((type) => String)
+  displayName: string;
 
   @Field((type) => String)
   username: string;
@@ -71,9 +83,9 @@ export class SensoredUser {
 
   @Field((type) => String, { nullable: true })
   avatar?: string;
-
-  @Field((type) => [Date], { nullable: true })
-  dates?: Date[];
+  
+  @Field((type) => [String])
+  dates: string[];
 }
 
 @ObjectType({ description: 'Tokens' })

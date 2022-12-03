@@ -1,11 +1,10 @@
-import { CreateUserArgs, UpdateUserArgs } from '../dto/user.input';
+import { UpdateUserArgs } from '../dto/user.input';
 import { GetUserNameArgs } from '../dto/user.args';
 import { Injectable, Inject } from '@nestjs/common';
-import { User } from 'src/definitions/graphql.def';
 import { Model } from 'mongoose';
 import { GetUserIdArgs } from 'src/dto/user.args';
-import { HashPassword } from 'src/common/utils/hash.utils';
 import { Document } from 'mongoose';
+import { User } from 'src/model/user.model';
 
 @Injectable()
 export class UserService {
@@ -31,7 +30,7 @@ export class UserService {
   }
 
   async getUserByName(args: GetUserNameArgs) {
-    return this.userModel.findOne({ _id: args.username });
+    return this.userModel.findOne({ username: args.username });
   }
 
   async updateUser(args: UpdateUserArgs) {

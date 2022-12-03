@@ -2,11 +2,14 @@ import * as mongoose from 'mongoose';
 
 export const DateSchema = new mongoose.Schema({
   _id: {
-    type: Number,
+    type: String,
+    default: new mongoose.Types.ObjectId(),
+  },
+
+  author: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
     required: true,
-    default: {
-      $inc: { seq: 1 },
-    },
   },
 
   title: {
@@ -26,7 +29,23 @@ export const DateSchema = new mongoose.Schema({
   },
 
   inviters: {
-    type: [mongoose.Schema.Types.ObjectId],
+    type: [
+      {
+        confirmed: {
+          type: Boolean,
+          default: false,
+        },
+        user: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'User',
+        },
+        status: {
+          type: String,
+          enum: ["Accepted", "Declined", "Unknown"],
+          default: "Unknown"
+        }
+      },
+    ],
     required: false,
     default: [],
   },
@@ -36,12 +55,22 @@ export const DateSchema = new mongoose.Schema({
     required: true,
     default: false,
   },
+
+  expireIn: {
+    type: Number,
+    required: true,
+  },
 });
 
 export const UserSchema = new mongoose.Schema({
   _id: {
     type: String,
-    default: new mongoose.Types.ObjectId()
+    default: new mongoose.Types.ObjectId(),
+  },
+
+  displayName: {
+    type: String,
+    required: true,
   },
 
   username: {
@@ -87,5 +116,18 @@ export const UserSchema = new mongoose.Schema({
   refreshToken: {
     type: String,
     default: '',
+  },
+
+  dates: {
+    type: [
+      {
+        postId: {
+          type: mongoose.Schema.Types.ObjectId,
+          required: true,
+          ref: "Date"
+        },
+      },
+    ],
+    default: [],
   },
 });

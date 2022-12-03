@@ -7,16 +7,19 @@ directive @upper on FIELD_DEFINITION
 """date"""
 type Date {
   _id: Int!
+  author: String!
   title: String!
   time: Int!
   createdAt: Int!
   inviters: [String!]
   cancelled: Boolean!
+  expireIn: Int!
 }
 
 """user"""
 type User {
   _id: String!
+  displayName: String!
   username: String!
   password: String!
   email: String!
@@ -25,17 +28,18 @@ type User {
   createdAt: Int!
   salt: String!
   refreshToken: String!
-  dates: [Date!]!
+  dates: [String!]!
 }
 
 """sensoredUser"""
 type SensoredUser {
   _id: String!
+  displayName: String!
   username: String!
   email: String!
   biography: String
   avatar: String
-  dates: [Date!]
+  dates: [String!]!
 }
 
 """Tokens"""
@@ -57,12 +61,17 @@ type Query {
   me: User!
   login(username: String!, password: String!): UserRes!
   logout: Boolean!
-  refreshToken: UserRes!
+  refreshToken: Tokens!
+  getDates(username: String!, duration: String): [Date!]!
+  getDateById(username: String!, id: String!): Date!
 }
 
 type Mutation {
   updateUser(updateUser: UpdateUserArgs!): User!
   signup(createUser: CreateUserArgs!): UserRes!
+  updateDate(updateDate: UpdateDateInput!): Date!
+  removeDate(removeDate: RemoveDateInput!): Boolean!
+  createDate(createDate: CreateDateInput!): Date!
 }
 
 input UpdateUserArgs {
@@ -80,4 +89,27 @@ input CreateUserArgs {
   username: String!
   password: String!
   email: String!
+}
+
+input UpdateDateInput {
+  query: String!
+  author: String
+  title: String
+  time: Int
+  inviters: [String!]
+  cancelled: Boolean
+  expireIn: Int
+}
+
+input RemoveDateInput {
+  username: String!
+  id: String!
+}
+
+input CreateDateInput {
+  title: String!
+  time: Int!
+  inviters: [String!]
+  cancelled: Boolean
+  expireIn: Int
 }

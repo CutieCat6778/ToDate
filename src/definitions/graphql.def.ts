@@ -25,17 +25,43 @@ export class CreateUserArgs {
     email: string;
 }
 
+export class UpdateDateInput {
+    query: string;
+    author?: Nullable<string>;
+    title?: Nullable<string>;
+    time?: Nullable<number>;
+    inviters?: Nullable<string[]>;
+    cancelled?: Nullable<boolean>;
+    expireIn?: Nullable<number>;
+}
+
+export class RemoveDateInput {
+    username: string;
+    id: string;
+}
+
+export class CreateDateInput {
+    title: string;
+    time: number;
+    inviters?: Nullable<string[]>;
+    cancelled?: Nullable<boolean>;
+    expireIn?: Nullable<number>;
+}
+
 export class Date {
     _id: number;
+    author: string;
     title: string;
     time: number;
     createdAt: number;
     inviters?: Nullable<string[]>;
     cancelled: boolean;
+    expireIn: number;
 }
 
 export class User {
     _id: string;
+    displayName: string;
     username: string;
     password: string;
     email: string;
@@ -44,16 +70,17 @@ export class User {
     createdAt: number;
     salt: string;
     refreshToken: string;
-    dates: Date[];
+    dates: string[];
 }
 
 export class SensoredUser {
     _id: string;
+    displayName: string;
     username: string;
     email: string;
     biography?: Nullable<string>;
     avatar?: Nullable<string>;
-    dates?: Nullable<Date[]>;
+    dates: string[];
 }
 
 export class Tokens {
@@ -79,13 +106,23 @@ export abstract class IQuery {
 
     abstract logout(): boolean | Promise<boolean>;
 
-    abstract refreshToken(): UserRes | Promise<UserRes>;
+    abstract refreshToken(): Tokens | Promise<Tokens>;
+
+    abstract getDates(username: string, duration?: Nullable<string>): Date[] | Promise<Date[]>;
+
+    abstract getDateById(username: string, id: string): Date | Promise<Date>;
 }
 
 export abstract class IMutation {
     abstract updateUser(updateUser: UpdateUserArgs): User | Promise<User>;
 
     abstract signup(createUser: CreateUserArgs): UserRes | Promise<UserRes>;
+
+    abstract updateDate(updateDate: UpdateDateInput): Date | Promise<Date>;
+
+    abstract removeDate(removeDate: RemoveDateInput): boolean | Promise<boolean>;
+
+    abstract createDate(createDate: CreateDateInput): Date | Promise<Date>;
 }
 
 type Nullable<T> = T | null;
