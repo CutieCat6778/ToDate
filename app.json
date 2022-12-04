@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Mobile",
-    "slug": "Mobile",
+    "slug": "todate",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -18,7 +18,8 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.cutiecat6778.todate"
     },
     "android": {
       "adaptiveIcon": {
@@ -28,6 +29,12 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "410dd6ed-876d-4079-8390-991f57dc7c9f"
+      }
+    },
+    "owner": "cutiecat6778"
   }
 }
