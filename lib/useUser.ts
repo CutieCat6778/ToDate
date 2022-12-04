@@ -1,10 +1,16 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import { User } from "./../types/graphql";
-import { useLazyQuery, useQuery } from "@apollo/client";
+import { createHttpLink, useApolloClient, useLazyQuery, useQuery } from "@apollo/client";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
 import { GetSelfGQL, RefreshToken } from "../graphql/auth.graphql";
-import { LoginRes, Tokens } from "../types/graphql";
+import { Tokens } from "../types/graphql";
+import { setContext } from '@apollo/client/link/context';
+
+const httpLink = createHttpLink({
+  uri: 'http://192.168.178.2:5000/graphql',
+});
+
 interface IProps {
   redirectTo?: string;
   redirectIfFound?: boolean;
@@ -13,6 +19,17 @@ interface IProps {
   disableQuery?: boolean;
   origin?: string;
 }
+
+const authLink = setContext(async (_, { headers }) => {
+  const token = await AsyncStorage.getItem('@access_token');
+  return {
+    headers: {
+      ...headers,
+      authorization: token ? `Bearer ${token}` : "",
+    }
+  }
+});
+
 
 export default function useUser({
   redirectTo,
@@ -99,11 +116,12 @@ export default function useUser({
 
       if (called1 && !loading1) {
         if (data1) {
-          console
           async function refresh() {
             const tokens: Tokens = data1.refreshToken.tokens;
             await AsyncStorage.setItem("@access_token", tokens.accessToken);
             await AsyncStorage.setItem("@refresh_token", tokens.refreshToken);
+            const ApolloClient = useApolloClient();
+            ApolloClient.link = authLink.concat(httpLink);
             if (origin != "Home" && navigate) return navigate("Home", { redirected: true, user: data1.user });
           }
           refresh();
@@ -139,9 +157,7 @@ export default function useUser({
         error.message != "Unauthorized" &&
         (origin == "Login" || origin == "Register")
       ) {
-        return null;
-      } else {
-        throw error;
+        return error;
       }
     }
   }

@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useEffect, useState } from "react";
 import { View, Text, Image, StyleSheet } from "react-native";
 import useUser from "../lib/useUser";
@@ -6,12 +7,8 @@ import NavBar from "../pageComponents/home/nav.home";
 
 export default function Home({ route, navigation }: any) {
   const [params, _setParams] = useState(route.params);
-  const [trigger, _setTrigger] = useState(false);
+  const [loading, _setLoading] = useState(true);
   const [user, _setUser] = useState(route.params?.user);
-  const [{ user: user1, loaded }, _setData] = useState({
-    user: {},
-    loaded: false,
-  })
 
   const elseStyles = StyleSheet.create({
     container: {
@@ -33,35 +30,32 @@ export default function Home({ route, navigation }: any) {
     }
   })
 
-  const res = useUser({
+  useUser({
     origin: route.name,
     navigate: navigation.navigate,
     disableQuery: params ? params.redirected : false,
   });
 
   useEffect(() => {
-    if(!trigger) {
-      if(res && res.loaded) _setData(res);
-      if(!user && (loaded && user1)) _setUser(user1); 
-      if(loaded) _setTrigger(true);
+    async function getUserInfo() {
+      const userInfoString = await AsyncStorage.getItem("@user_info");
+      const userInfo = JSON.parse(userInfoString || "{}");
+      _setUser(userInfo);
+      _setLoading(false);
     }
-  }, [loaded, res, trigger, user, user1])
+    getUserInfo();
+  })
 
-  if(loaded && user) {
+  if(!loading && user) {
     return (
       <View style={styles.container}>
         <NavBar user={user} navigation={navigation}/>
         <Header user={user} navigation={navigation}/>
       </View>
     );
-  } else if(!loaded || !user) {
-    return (
-      <View style={elseStyles.container}>
-        <Text>
-          Loading...
-        </Text>
-      </View>
-    )
+  }
+  if(!loading && !user) {
+    navigation.navigate("Login", { redirected: true })
   } else {
     return (
       <View style={elseStyles.container}>

@@ -1,16 +1,18 @@
+import { useQuery } from "@apollo/client";
 import React, { useState } from "react";
 import { SafeAreaView, StyleSheet, Text, View } from "react-native";
 import Calendar from "../../components/Calendar";
+import { GetDatesGql } from "../../graphql/date.graphql";
 import { User } from "../../types/graphql";
 
 
 export function GreetingResolver(hour: number) {
 
-  if(hour > 5 && hour < 11) {
+  hour = hour + 1
+
+  if(hour > 5 && hour < 12) {
     return "Good morning, "
-  } else if(hour > 10 && hour < 13) {
-    return "Good day, "
-  } else if(hour > 12 && hour < 18) {
+  } else if(hour >= 12 && hour < 18) {
     return "Good afternoon, "
   } else if(hour > 17 && (hour - 12) < 13) {
     return "Good evening, "
@@ -25,16 +27,21 @@ interface IProps {
 }
 
 export default function Header({ user, navigation }: IProps) {
-  const [greeting, _setGreeting] = useState<string>(GreetingResolver(new Date().getUTCHours()) || "Hello, ")
+  const [greeting, _setGreeting] = useState<string>(GreetingResolver(new Date().getUTCHours()) || "Hello, ");
+  const [title, _setTitle] = useState("");
+
+  const { data, loading, error } = useQuery(GetDatesGql);
+
+  if(!loading) console.log(data);
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header} >
         <Text style={styles.greeting}>
-          { greeting } {user.username}
+          { greeting } {user.displayName}
         </Text>
         <Text style={styles.greetingSub}>
-          Here are your plan for today!
+          What is your plan today?
         </Text>
       </View>
       <Calendar user={user}/>
