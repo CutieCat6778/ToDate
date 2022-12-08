@@ -100,6 +100,48 @@ export class UserRes {
     tokens: Tokens;
 }
 
+export class Interception {
+    baseStreet: string;
+    secondaryStreet1: string;
+    intersectionType: string;
+    displayName: string;
+}
+
+export class Address {
+    addressLine: string;
+    adminDistrict: string;
+    adminDistrict2: string;
+    countryRegion: string;
+    formattedAddress: string;
+    intersection: Interception;
+    locality: string;
+    postalCode: string;
+    countryRegionIso2: string;
+}
+
+export class GeocodePoint {
+    type: string;
+    coordinates: number[];
+    calculationMethod: string;
+    usageTypes: string[];
+}
+
+export class Point {
+    type: string;
+    coordinates: number[];
+}
+
+export class Location {
+    bbox: number[];
+    name: string;
+    point: Point;
+    address: Address;
+    confidence: string;
+    entityType: string;
+    geocodePoint: GeocodePoint;
+    matchCodes: string[];
+}
+
 export abstract class IQuery {
     abstract sayHello(): string | Promise<string>;
 
@@ -118,6 +160,8 @@ export abstract class IQuery {
     abstract getDates(username: string, duration?: Nullable<string>): Dates | Promise<Dates>;
 
     abstract getDateById(username: string, id: string): Date | Promise<Date>;
+
+    abstract getLocationData(lat: string, long: string): Location | Promise<Location>;
 }
 
 export abstract class IMutation {

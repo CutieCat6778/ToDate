@@ -8,7 +8,7 @@ export const DateSchema = new mongoose.Schema({
 
   author: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
+    ref: 'User',
     required: true,
   },
 
@@ -46,9 +46,9 @@ export const DateSchema = new mongoose.Schema({
         },
         status: {
           type: String,
-          enum: ["Accepted", "Declined", "Unknown"],
-          default: "Unknown"
-        }
+          enum: ['Accepted', 'Declined', 'Unknown'],
+          default: 'Unknown',
+        },
       },
     ],
     required: false,
@@ -95,6 +95,17 @@ export const UserSchema = new mongoose.Schema({
     unique: true,
   },
 
+  friends: {
+    type: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        ref: "User"
+      },
+    ],
+    default: [],
+  },
+
   biography: {
     type: String,
     required: false,
@@ -128,7 +139,7 @@ export const UserSchema = new mongoose.Schema({
       {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
-        ref: "Date"
+        ref: 'Date',
       },
     ],
     default: [],

@@ -13,6 +13,8 @@ import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { DateModule } from './date/date.module';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { ApiModule } from './api/api.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
@@ -42,6 +44,10 @@ import { ThrottlerModule } from '@nestjs/throttler';
     ThrottlerModule.forRoot({
       ttl: 60,
       limit: 10,
+    }),
+    ApiModule,
+    ConfigModule.forRoot({
+      isGlobal: true
     })
   ],
   providers: [AppService, AppResolver, ComplexityPlugin, LoggingPlugin],

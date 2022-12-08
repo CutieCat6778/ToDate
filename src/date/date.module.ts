@@ -7,6 +7,7 @@ import { DateResolver } from './date.resolver';
 
 @Module({
   imports: [UserModule, DatabaseModule],
-  providers: [DateService, ...datesProviders, DateResolver]
+  providers: [DateService, ...datesProviders, DateResolver],
+  exports: [DateService],
 })
 export class DateModule {}
