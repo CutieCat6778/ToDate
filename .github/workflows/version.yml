@@ -3,7 +3,7 @@ name: Mobile
 on:
   push:
     branches:
-      - mobile
+      - ios
 
 jobs:
   version:
