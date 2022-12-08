@@ -34,7 +34,7 @@ export default function Header({ user, navigation }: IProps) {
           { greeting } {user.displayName}
         </Text>
       </View>
-      <Calendar user={user}/>
+      <Calendar user={user} navigate={navigation.navigate}/>
     </SafeAreaView>
   )
 }

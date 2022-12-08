@@ -1,4 +1,10 @@
-import { SafeAreaView, StyleSheet, Text, View } from "react-native";
+import {
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { Date as DateModel, Dates, User } from "../types/graphql";
 import React, { useState } from "react";
 import { useQuery } from "@apollo/client";
@@ -10,6 +16,7 @@ import Avatar from "./Avatar";
 
 interface IProps {
   user: User;
+  navigate: any;
 }
 
 const Col = ({ children }: any) => {
@@ -23,81 +30,106 @@ interface EProps {
 
 interface ResData {
   res?: DateModel;
+  redirect: any;
 }
 
 const Row = ({ name, children }: EProps) => {
   return <SafeAreaView style={styles[name]}>{children}</SafeAreaView>;
 };
 
-const Date1 = ({ res }: ResData) => {
-
-  const [user, _setUser] = useState<User>(getKey("@user_info"))
+const Date1 = ({ res, redirect }: ResData) => {
+  const [user, _setUser] = useState<User>(getKey("@user_info"));
 
   if (res) {
-
-    console.log(user);
-
     const time = res.time + res.createdAt;
-
-    console.log(time, time - new Date().getTime())
 
     return (
       <Row name="1row" key={res._id + "row"}>
         <View style={styles.eventBox}>
           <Text style={styles.eventTitle}>{res.title}</Text>
           <View style={styles.detailBox}>
-            <Text style={styles.eventTime}>{moment.default(time).fromNow()} - </Text>
-            <Text style={styles.eventLocation}>Villingen</Text>  
+            <Text style={styles.eventTime}>
+              {moment.default(time).fromNow()} | Villingen-Schwenningen
+            </Text>
           </View>
           <View style={styles.avatarBox}>
-            <Avatar url={user.avatar?.toString()} width={70} height={70} style={styles.avatar}/>
+            <Avatar
+              url={user.avatar?.toString()}
+              width={70}
+              height={70}
+              style={styles.avatar}
+            />
           </View>
         </View>
       </Row>
     );
   } else {
     return (
-      <Row name="1row">
-        <View style={styles.eventBox}>
-          <View style={styles.eventSubBox}>
-            <Text style={styles.eventSub}>
-              Add event
-            </Text>
-            <Icon name="plus" size={30}/>
+      <TouchableOpacity
+        onPress={() => {
+          redirect("CreateDate");
+        }}
+      >
+        <Row name="1row">
+          <View style={styles.eventBox}>
+            <View style={styles.eventSubBox}>
+              <Text style={styles.eventSub}>Add event</Text>
+              <Icon name="plus" size={30} />
+            </View>
           </View>
-        </View>
-      </Row>
-    )
+        </Row>
+      </TouchableOpacity>
+    );
   }
 };
 
-const Date2 = ({ res }: ResData) => {
-  if(res) {
+const Date2 = ({ res, redirect }: ResData) => {
+  const [user, _setUser] = useState<User>(getKey("@user_info"));
+
+  if (res) {
+    const time = res.time + res.createdAt;
+
     return (
       <Row name="2row" key={res._id + "row"}>
-        <View key={res._id + "view"} style={styles.eventBox}>
-          <Text key={res._id + "title"} style={styles.eventTitle}>Title: {res.title}</Text>
+        <View style={styles.eventBox}>
+          <Text style={styles.eventTitle}>{res.title}</Text>
+          <View style={styles.detailBox}>
+            <Text style={styles.eventTime}>
+              {moment.default(time).fromNow()} - Villingen-Schwenningen
+            </Text>
+          </View>
+          <View style={styles.avatarBox}>
+            <Avatar
+              url={user.avatar?.toString()}
+              width={70}
+              height={70}
+              style={styles.avatar}
+            />
+          </View>
         </View>
       </Row>
     );
   } else {
     return (
-      <Row name="2row">
-        <View style={styles.eventBox}>
-          <View style={styles.eventSubBox}>
-            <Text style={styles.eventSub}>
-              Create event
-            </Text>
-            <Icon name="plus" size={30}/>
+      <TouchableOpacity
+        onPress={() => {
+          redirect("CreateDate");
+        }}
+      >
+        <Row name="2row">
+          <View style={styles.eventBox}>
+            <View style={styles.eventSubBox}>
+              <Text style={styles.eventSub}>Create event</Text>
+              <Icon name="plus" size={30} />
+            </View>
           </View>
-        </View>
-      </Row>
-    )
+        </Row>
+      </TouchableOpacity>
+    );
   }
-
 };
 
-export default function Calendar({ user }: IProps) {
+export default function Calendar({ user, navigate }: IProps) {
   const [res, setRes] = useState<Dates>();
 
   const { data, loading, error } = useQuery(GetDatesGql, {
@@ -127,10 +159,10 @@ export default function Calendar({ user }: IProps) {
           </Row>
           {res?.dates && res.dates.length > 0
             ? res.dates.map((a, index) => {
-                return <Date1 res={a} key={index} />;
+                return <Date1 res={a} key={index} redirect={navigate} />;
               })
             : null}
-          <Date1/>
+          <Date1 redirect={navigate} />
         </Col>
         <Col>
           <Row name="_2row">
@@ -138,15 +170,15 @@ export default function Calendar({ user }: IProps) {
           </Row>
           {res?.next && res.next.length > 0
             ? res.next.map((a, index) => {
-                return <Date2 res={a} key={index} />;
+                return <Date2 res={a} key={index} redirect={navigate} />;
               })
             : null}
-          <Date2/>
+          <Date2 redirect={navigate} />
         </Col>
       </View>
     );
   } else {
-    console.log(error);
+    console.log("Calendar", error);
     return null;
   }
 }
@@ -200,7 +232,7 @@ const styles = StyleSheet.create({
   eventTitle: {
     fontSize: 20,
     opacity: 0.7,
-    fontWeight: "600"
+    fontWeight: "600",
   },
   eventTime: {
     fontSize: 12,
@@ -214,10 +246,7 @@ const styles = StyleSheet.create({
   },
   detailBox: {
     flexDirection: "row",
-  },
-  eventSub: {
-    fontSize: 14,
-    marginLeft: 8,
+    maxWidth: "80%",
   },
   avatar: {
     height: 30,
@@ -233,9 +262,13 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
     flexDirection: "row-reverse",
     opacity: 0.5,
-    backgroundColor: "#f0f0f0",
+    // backgroundColor: "#f0f0f0",
     padding: 10,
     borderRadius: 10,
+  },
+  eventSub: {
+    fontSize: 14,
+    marginLeft: 8,
   },
   title: {
     color: "rgb(0, 0, 0, 250)",

@@ -13,7 +13,6 @@ export default function NavBar({ user, navigation }: IProps) {
 
   const styles = StyleSheet.create({
     container: {
-      marginTop: 60,
       justifyContent: "space-between",
       alignItems: "center",
       maxHeight: 60,

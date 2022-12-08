@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { SafeAreaView, Text, StyleSheet } from "react-native";
 import { removeTokens, setKey } from "../lib/localStorage";
 
 export default function Logout({ navigation, route }: any) {
@@ -9,9 +9,9 @@ export default function Logout({ navigation, route }: any) {
   });
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <Text style={styles.subtitle}>Logging out...</Text>
-    </View>
+    </SafeAreaView>
   );
 }
 const styles = StyleSheet.create({
