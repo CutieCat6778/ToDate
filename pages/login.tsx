@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {
-  Alert,
   KeyboardAvoidingView,
-  Platform,
   Pressable,
   SafeAreaView,
   StyleSheet,
@@ -16,17 +14,13 @@ import useUser from "../lib/useUser";
 import { Controller, useForm } from "react-hook-form";
 import { useLazyQuery } from "@apollo/client";
 import { LoginGQL } from "../graphql/auth.graphql";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { UserRes } from "../types/graphql";
-import ValidationBox, {
-  check,
-  PasswordValidationBox,
-  UserValidationBox,
-} from "../components/ValidationChecker";
+import ValidationBox from "../components/ValidationChecker";
+import { setAuthInfo } from "../lib/localStorage";
 
 export default function Login({ route, navigation }: any) {
   const [trigger, _setTrigger] = useState(false);
-  const [ErrorMessage, _setErrorMessage] = useState<string>("");
+  const [errorMessage, _setErrorMessage] = useState<string>("");
   const [loginInfo, _setLoginInfo] = useState({
     username: "",
     password: "",
@@ -34,10 +28,7 @@ export default function Login({ route, navigation }: any) {
 
   useUser({
     origin: route.name,
-    redirectTo: "Home",
-    redirectIfFound: true,
     navigate: navigation.navigate,
-    disableQuery: route.params?.redirected ? route.params.redirected : false,
   });
 
   const [loadData, { called, loading, data, error }] = useLazyQuery(LoginGQL, {
@@ -47,36 +38,6 @@ export default function Login({ route, navigation }: any) {
     },
   });
 
-  useEffect(() => {
-    if (called && !loading && !trigger) {
-      if (error) {
-        _setErrorMessage(error.message);
-      }
-      if (!data) {
-        if (ErrorMessage.length > 8) {
-          _setErrorMessage("Incorrect login informations");
-        }
-      } else if (data) {
-        if (ErrorMessage != "") _setErrorMessage("");
-        async function redirectToHome() {
-          const user: UserRes = data.login;
-          await AsyncStorage.setItem("@access_token", user.tokens.accessToken);
-          await AsyncStorage.setItem(
-            "@refresh_token",
-            user.tokens.refreshToken
-          );
-          await AsyncStorage.setItem(
-            "@expires_at",
-            `${new Date().getTime() + 604800000}`
-          );
-          await AsyncStorage.setItem("@user_info", JSON.stringify(user.user));
-          navigation.navigate("Home", { redirected: true, user: user.user });
-        }
-        if(!trigger) redirectToHome();
-        _setTrigger(true);
-      }
-    }
-  }, [called, loading, trigger, data, ErrorMessage, navigation, error]);
   interface FormData {
     username: string;
     password: string;
@@ -94,16 +55,36 @@ export default function Login({ route, navigation }: any) {
       username,
       password,
     });
-    if(!called) loadData();
+    loadData();
   });
+
+  useEffect(() => {
+    if (called && !loading && !trigger) {
+      if (error) {
+        _setErrorMessage(error.message);
+      }
+      if (!data) {
+        if (errorMessage.length > 8) {
+          _setErrorMessage("Incorrect login informations");
+        }
+      } else if (data) {
+        if (errorMessage != "") _setErrorMessage("");
+        async function redirectToHome() {
+          const user: UserRes = data.login;
+          console.log(user);
+          setAuthInfo(user);
+          navigation.navigate("Home", { redirected: true, user: user.user });
+        }
+        if (!trigger) redirectToHome();
+        _setTrigger(true);
+      }
+    }
+  }, [called, loading, trigger, data, errorMessage, navigation, error]);
 
   return (
     <View style={styles.root}>
       <SafeAreaView style={styles.safeAreaView}>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          style={styles.content}
-        >
+        <KeyboardAvoidingView behavior={"padding"} style={styles.content}>
           <Text style={styles.title}>Welcome back!</Text>
 
           <SizedBox height={8} />
@@ -116,16 +97,16 @@ export default function Login({ route, navigation }: any) {
             <Text style={styles.subtitle}>Create an account here!</Text>
           </TouchableOpacity>
 
-          {ErrorMessage == "" ? null : ErrorMessage != "user" &&
-            ErrorMessage != "password" ? (
+          {errorMessage == "" ? null : errorMessage != "user" &&
+            errorMessage != "password" ? (
             <View>
               <SizedBox height={8} />
-              <Text style={styles.error}> {ErrorMessage} </Text>
+              <Text style={styles.error}> {errorMessage} </Text>
             </View>
           ) : (
             <View>
               <SizedBox height={8} />
-              <ValidationBox data={ErrorMessage} />
+              <ValidationBox data={errorMessage} />
             </View>
           )}
 
@@ -135,6 +116,9 @@ export default function Login({ route, navigation }: any) {
             <Controller
               control={control}
               name="username"
+              rules={{
+                required: true,
+              }}
               render={({ field: { onBlur, onChange, value } }) => (
                 <View style={styles.form}>
                   <Text style={styles.label}>Username</Text>
@@ -160,6 +144,9 @@ export default function Login({ route, navigation }: any) {
             <Controller
               control={control}
               name="password"
+              rules={{
+                required: true,
+              }}
               render={({ field: { onBlur, onChange, value } }) => (
                 <View style={styles.form}>
                   <Text style={styles.label}>Password</Text>

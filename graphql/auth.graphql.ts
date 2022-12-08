@@ -8,6 +8,7 @@ export const LoginGQL = gql`
         email
         biography
         avatar
+        displayName
       }
       tokens {
         accessToken
@@ -29,6 +30,7 @@ export const RegisterGQL = gql`
         email
         biography
         avatar
+        displayName
       }
       tokens {
         accessToken
@@ -45,6 +47,7 @@ export const GetSelfGQL = gql`
       password
       biography
       avatar
+      displayName
     }
   }
 `;
@@ -52,16 +55,8 @@ export const GetSelfGQL = gql`
 export const RefreshToken = gql`
   query {
     refreshToken {
-      user {
-        username
-        email
-        biography
-        avatar
-      }
-      tokens {
-        accessToken
-        refreshToken
-      }
+      accessToken
+      refreshToken
     }
   }
 `

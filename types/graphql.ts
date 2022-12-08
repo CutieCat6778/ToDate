@@ -46,17 +46,24 @@ export interface CreateDateInput {
   inviters?: Nullable<string[]>;
   cancelled?: Nullable<boolean>;
   expireIn?: Nullable<number>;
+  location: string;
 }
 
 export interface Date {
   _id: number;
   author: string;
   title: string;
+  location: string;
   time: number;
   createdAt: number;
   inviters?: Nullable<string[]>;
   cancelled: boolean;
   expireIn: number;
+}
+
+export interface Dates {
+  dates: Date[];
+  next?: Nullable<Date[]>;
 }
 
 export interface User {
@@ -92,5 +99,6 @@ export interface UserRes {
   user: User;
   tokens: Tokens;
 }
+
 
 type Nullable<T> = T | null;

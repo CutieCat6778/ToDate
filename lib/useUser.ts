@@ -1,70 +1,165 @@
-/* eslint-disable react-hooks/rules-of-hooks */
-import { User } from "./../types/graphql";
-import { createHttpLink, useApolloClient, useLazyQuery, useQuery } from "@apollo/client";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useEffect, useState } from "react";
+import { UserRes } from "./../types/graphql";
+import {
+  createHttpLink,
+  useLazyQuery,
+} from "@apollo/client";
+import { useState } from "react";
 import { GetSelfGQL, RefreshToken } from "../graphql/auth.graphql";
 import { Tokens } from "../types/graphql";
-import { setContext } from '@apollo/client/link/context';
-
-const httpLink = createHttpLink({
-  uri: 'http://192.168.178.2:5000/graphql',
-});
-
+import { getKey, removeTokens, setKey, setToken } from "./localStorage";
 interface IProps {
-  redirectTo?: string;
-  redirectIfFound?: boolean;
-  navigate?: Function;
-  returnLoggedIn?: boolean;
-  disableQuery?: boolean;
-  origin?: string;
+  navigate: Function;
+  origin: string;
 }
 
-const authLink = setContext(async (_, { headers }) => {
-  const token = await AsyncStorage.getItem('@access_token');
-  return {
-    headers: {
-      ...headers,
-      authorization: token ? `Bearer ${token}` : "",
+
+export function updateUser(accessToken: string, redirect: Function, call: any, args: any) {
+  const user = getMe(accessToken, call, args);
+  if (user) {
+    if (user?.error) {
+      return redirect("Login");
+    } else if(user?.user) {
+      setKey("@user_info", user.user);
+      return redirect("Home")
     }
   }
-});
+}
 
+export default function useUser({ navigate, origin }: IProps) {
 
-export default function useUser({
-  redirectTo,
-  redirectIfFound,
-  navigate,
-  returnLoggedIn,
-  disableQuery,
-  origin,
-}: IProps) {
-
-  if(disableQuery) return {
-    loaded: true
-  };
-
-  const [refreshToken, _setRefreshToken] = useState("_");
-  const [accessToken, _setAccessToken] = useState("_");
-
-  async function ReadData() {
-    const refreshT = await AsyncStorage.getItem("@refresh_token");
-    const accessT = await AsyncStorage.getItem("@access_token");
-
-    _setRefreshToken(refreshT || "");
-    _setAccessToken(accessT || "");
+  const redirect = function(path: string, params?: any) {
+    if(origin != path) {
+      navigate(path, { redirected: true, ...params })
+    }
   }
 
-  useEffect(() => {
-    if (refreshToken == "_") ReadData();
+  const date = new Date().getTime();
+
+  const [refreshToken, _setRefreshToken] = useState(getKey("@refresh_token"));
+  const [accessToken, _setAccessToken] = useState(getKey("@access_token"));
+  const [user, _setUser] = useState("@user_info");
+  const [refreshTokenExp, _setRefreshTokenExp] = useState(
+    getKey("@refresh_token_exp")
+  );
+  const [accessTokenExp, _setAccessTokenExp] = useState(
+    getKey("@access_token_exp")
+  );
+  const [loggedIn, _setLoggedIn] = useState(getKey("@logged_in"));
+
+  const [queryUser, args] =
+  useLazyQuery(GetSelfGQL, {
+    context: {
+      headers: {
+        authorization: accessToken
+      }
+    }
   });
+
+  console.log(accessToken, refreshToken, loggedIn)
+
+  if (refreshToken && date > refreshTokenExp) {
+    setKey("@logged_in", false)
+    return redirect("Login");
+  }
+
+  if (refreshToken && date > accessTokenExp) {
+    setKey("@logged_in", false)
+    const res = Refresh(refreshToken);
+    if (res && !res.error && res.accessToken) {
+      updateUser(res.accessToken, redirect, queryUser, args);
+    } else {
+      console.log(res?.error)
+      return redirect("Login")
+    }
+  }
+
+  if (
+    loggedIn &&
+    origin &&
+    ["Router", "Login", "Register"].includes(origin) &&
+    redirect
+  ) {
+    return redirect("Home", { redirected: true, user });
+  }
+
+  if(!accessToken && !refreshToken) {
+    setKey("@logged_in", false)
+    return redirect("Login")
+  }
+}
+
+export function Refresh(refreshToken: string) {
+
+  const [loadData, { called, data, loading, error }] = useLazyQuery(
+    RefreshToken,
+    {
+      context: {
+        headers: {
+          Authorization: `Bearer ${refreshToken}`,
+        },
+      },
+    }
+  );
+
+  if (!called) loadData();
+
+  if (!loading) {
+    if (data) {
+      const { accessToken, refreshToken }: Tokens = data.refreshToken;
+
+      setToken({
+        accessToken,
+        refreshToken
+      });
+
+      return {
+        accessToken,
+        refreshToken,
+        error: undefined,
+      };
+    }
+    if (!data) {
+      return {
+        accessToken: undefined,
+        refreshToken: undefined,
+        error: error,
+      };
+    }
+  }
+}
+
+export function getMe(accessToken: string, queryUser: any, { loading, called, data, error }: any) {
+  if (!called) queryUser();
+
+  if (!loading && called) {
+    if (data) {
+      const user: UserRes = data.me;
+      return { user };
+    } else if (!data && error) {
+      return {
+        error: error,
+        user: undefined
+      };
+    }
+  }
+}
+
+/*
+OLD METHOD
+
+const [refreshToken, _setRefreshToken] = useState(
+    getKey("@refresh_token") ?? ""
+  );
+  const [accessToken, _setAccessToken] = useState(
+    getKey("@refresh_token") ?? ""
+  );
 
   const [queryUser, { called, data, loading, error }] = useLazyQuery(
     GetSelfGQL,
     {
       context: {
         headers: {
-          "Authorization": `Bearer ${accessToken}`,
+          Authorization: `Bearer ${accessToken}`,
         },
       },
     }
@@ -76,15 +171,15 @@ export default function useUser({
   ] = useLazyQuery(RefreshToken, {
     context: {
       headers: {
-        "Authorization": `Bearer ${refreshToken}`,
+        Authorization: `Bearer ${refreshToken}`,
       },
     },
   });
 
   if (disableQuery) return null;
   else if (accessToken == "") {
-    navigate && (origin != "Login" && origin != "Register")
-      ? navigate("Login", { redirected: true })
+    navigate && origin != "Login" && origin != "Register"
+      ? navigate("Login")
       : null;
   } else if (!called && accessToken.length > 2) queryUser();
 
@@ -110,7 +205,7 @@ export default function useUser({
       };
     }
   }
-  if (navigate && refreshToken != "_" && called && !loading) {
+  if (navigate && called && !loading) {
     if (!user && refreshToken && error?.message == "Unauthorized") {
       if (!called1) loadData();
 
@@ -122,16 +217,21 @@ export default function useUser({
             await AsyncStorage.setItem("@refresh_token", tokens.refreshToken);
             const ApolloClient = useApolloClient();
             ApolloClient.link = authLink.concat(httpLink);
-            if (origin != "Home" && navigate) return navigate("Home", { redirected: true, user: data1.user });
+            if (origin != "Home" && navigate) {
+              setKey("@logged_in", true);
+              return navigate("Home", { redirected: true, user: data1.user });
+            }
           }
           refresh();
-        } else if (!data && (origin != "Login" && origin != "Register")) {
-          navigate("Login", { redirected: true });
+        } else if (!data && origin != "Login" && origin != "Register") {
+          setKey("@logged_in", false);
+          navigate("Login");
         }
       }
-    }else {
+    } else {
       if (user) {
         if (redirectTo && redirectIfFound && origin != redirectTo) {
+          setKey("@logged_in", false);
           return navigate(redirectTo, { redirected: true, user: user });
         }
         return {
@@ -144,21 +244,26 @@ export default function useUser({
         origin != "Login" &&
         origin != "Register"
       ) {
-        return navigate("Login", { redirected: true });
+        setKey("@logged_in", false);
+        return navigate("Login");
       }
     }
     if (error) {
       if (
         error.message == "Unauthorized" &&
-        (origin != "Login" && origin != "Register")
-      )
-        return navigate("Login", { redirected: true });
-      else if (
+        origin != "Login" &&
+        origin != "Register"
+      ) {
+        setKey("@logged_in", false);
+        return navigate("Login");
+      } else if (
         error.message != "Unauthorized" &&
         (origin == "Login" || origin == "Register")
       ) {
+        setKey("@logged_in", false);
         return error;
       }
     }
   }
-}
+
+*/

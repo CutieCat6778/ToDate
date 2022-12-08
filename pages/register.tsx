@@ -14,11 +14,11 @@ import {
 import SizedBox from "../components/SizedBox";
 import useUser from "../lib/useUser";
 import { Controller, useForm } from "react-hook-form";
-import { useLazyQuery, useMutation } from "@apollo/client";
+import { useMutation } from "@apollo/client";
 import { RegisterGQL } from "../graphql/auth.graphql";
 import { UserRes } from "../types/graphql";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import ValidationBox, { check } from "../components/ValidationChecker";
+import { setAuthInfo, setKey } from "../lib/localStorage";
 
 export default function Register({ route, navigation }: any) {
   const [trigger, _setTrigger] = useState(false);
@@ -39,10 +39,7 @@ export default function Register({ route, navigation }: any) {
 
   useUser({
     origin: route.name,
-    redirectTo: "Home",
-    redirectIfFound: true,
     navigate: navigation.navigate,
-    disableQuery: route.params?.redirected ? route.params.redirected : false,
   });
 
   useEffect(() => {
@@ -59,16 +56,7 @@ export default function Register({ route, navigation }: any) {
         if (errorMessage != "") _setErrorMessage("");
         async function redirectToHome() {
           const user: UserRes = data.signup;
-          await AsyncStorage.setItem("@access_token", user.tokens.accessToken);
-          await AsyncStorage.setItem(
-            "@refresh_token",
-            user.tokens.refreshToken
-          );
-          await AsyncStorage.setItem(
-            "@expires_at",
-            `${new Date().getTime() + 604800000}`
-          );
-          await AsyncStorage.setItem("@user_info", JSON.stringify(user.user));
+          setAuthInfo(user);
           navigation.navigate("Home", { redirected: true, user: user.user });
         }
         redirectToHome();
@@ -137,6 +125,9 @@ export default function Register({ route, navigation }: any) {
             <Controller
               control={control}
               name="username"
+              rules={{
+                required: true,
+              }}
               render={({ field: { onBlur, onChange, value } }) => (
                 <View style={styles.form}>
                   <Text style={styles.label}>Username</Text>
@@ -163,6 +154,9 @@ export default function Register({ route, navigation }: any) {
             <Controller
               control={control}
               name="email"
+              rules={{
+                required: true,
+              }}
               render={({ field: { onBlur, onChange, value } }) => (
                 <View style={styles.form}>
                   <Text style={styles.label}>Email</Text>
@@ -188,6 +182,9 @@ export default function Register({ route, navigation }: any) {
             <Controller
               control={control}
               name="password"
+              rules={{
+                required: true,
+              }}
               render={({ field: { onBlur, onChange, value } }) => (
                 <View style={styles.form}>
                   <Text style={styles.label}>Password</Text>
