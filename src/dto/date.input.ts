@@ -5,7 +5,7 @@ export class CreateDateInput {
   @Field((type) => String)
   title: string;
 
-  @Field((type) => Int)
+  @Field((type) => Number)
   time: number;
 
   @Field((type) => [String], { nullable: true })
@@ -14,8 +14,11 @@ export class CreateDateInput {
   @Field((type) => Boolean, { nullable: true })
   cancelled?: boolean;
 
-  @Field((type) => Int, { nullable: true })
+  @Field((type) => Number, { nullable: true })
   expireIn?: number;
+
+  @Field((type) => String)
+  location: string;
 }
 
 @InputType()
@@ -29,7 +32,7 @@ export class UpdateDateInput {
   @Field((type) => String, { nullable: true })
   title: string;
 
-  @Field((type) => Int, { nullable: true })
+  @Field((type) => Number, { nullable: true })
   time: number;
 
   @Field((type) => [String], { nullable: true })
@@ -38,7 +41,7 @@ export class UpdateDateInput {
   @Field((type) => Boolean, { nullable: true })
   cancelled: boolean;
 
-  @Field((type) => Int, { nullable: true })
+  @Field((type) => Number, { nullable: true })
   expireIn: number;
 }
 

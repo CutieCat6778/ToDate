@@ -6,14 +6,21 @@ directive @upper on FIELD_DEFINITION
 
 """date"""
 type Date {
-  _id: Int!
+  _id: Float!
   author: String!
   title: String!
-  time: Int!
-  createdAt: Int!
+  location: String!
+  time: Float!
+  createdAt: Float!
   inviters: [String!]
   cancelled: Boolean!
-  expireIn: Int!
+  expireIn: Float!
+}
+
+"""Dates"""
+type Dates {
+  dates: [Date!]!
+  next: [Date!]
 }
 
 """user"""
@@ -25,7 +32,7 @@ type User {
   email: String!
   biography: String
   avatar: String
-  createdAt: Int!
+  createdAt: Float!
   salt: String!
   refreshToken: String!
   dates: [String!]!
@@ -62,7 +69,7 @@ type Query {
   login(username: String!, password: String!): UserRes!
   logout: Boolean!
   refreshToken: Tokens!
-  getDates(username: String!, duration: String): [Date!]!
+  getDates(username: String!, duration: String): Dates!
   getDateById(username: String!, id: String!): Date!
 }
 
@@ -95,10 +102,10 @@ input UpdateDateInput {
   query: String!
   author: String
   title: String
-  time: Int
+  time: Float
   inviters: [String!]
   cancelled: Boolean
-  expireIn: Int
+  expireIn: Float
 }
 
 input RemoveDateInput {
@@ -108,8 +115,9 @@ input RemoveDateInput {
 
 input CreateDateInput {
   title: String!
-  time: Int!
+  time: Float!
   inviters: [String!]
   cancelled: Boolean
-  expireIn: Int
+  expireIn: Float
+  location: String!
 }

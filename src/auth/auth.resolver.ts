@@ -14,7 +14,6 @@ import { GqlThrottlerGuard } from './guards/throttler.guard';
 export class AuthResolver {
   constructor(private authService: AuthService) {}
 
-  @Throttle(3, 30)
   @UseGuards(GqlThrottlerGuard)
   @Query((returns) => UserRes)
   async login(@Args() args: LoginArgs) {
@@ -22,7 +21,7 @@ export class AuthResolver {
   }
   
   @UseGuards(GqlAccessTokenAuthGuard, GqlThrottlerGuard)
-  @Throttle(3, 30)
+  // @Throttle(3, 30)
   @Query((returns) => Boolean)
   @UseGuards(GqlAccessTokenAuthGuard)
   async logout(@CurrentUser() user) {
@@ -30,17 +29,17 @@ export class AuthResolver {
   }
   
   @UseGuards(GqlAccessTokenAuthGuard, GqlThrottlerGuard)
-  @Throttle(1, 60)
+  // @Throttle(1, 60)
   @Mutation((returns) => UserRes)
   async signup(@Args('createUser') createUser: CreateUserArgs) {
     return this.authService.signUp(createUser);
   }
   
   @UseGuards(GqlThrottlerGuard, GqlRefreshTokenAuthGuard)
-  @Throttle(1, 10)
+  // @Throttle(1, 10)
   @Query((returns) => Tokens)
-  @UseGuards(GqlRefreshTokenAuthGuard)
   async refreshToken(@CurrentUser() user) {
+    console.log("Refreshed", user);
     const userId = user['sub'];
     const refreshToken = user['refreshToken'];
     return this.authService.refreshTokens(userId, refreshToken);

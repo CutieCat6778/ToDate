@@ -3,7 +3,7 @@ import { Field, Int, ObjectType } from '@nestjs/graphql';
 
 @ObjectType({ description: 'date' })
 export class Date {
-  @Field((type) => Int)
+  @Field((type) => Number)
   _id: number;
 
   @Field((type) => String)
@@ -12,10 +12,13 @@ export class Date {
   @Field((type) => String)
   title: string;
 
-  @Field((type) => Int)
+  @Field((type) => String)
+  location: string;
+
+  @Field((type) => Number)
   time: number;
 
-  @Field((type) => Int)
+  @Field((type) => Number)
   createdAt: number;
 
   @Field((type) => [String], { nullable: true })
@@ -24,8 +27,17 @@ export class Date {
   @Field((type) => Boolean)
   cancelled: boolean;
 
-  @Field((type) => Int)
+  @Field((type) => Number)
   expireIn: number;
+}
+
+@ObjectType({ description: "Dates" })
+export class Dates {
+  @Field((type) => [Date])
+  dates: Date[]
+
+  @Field((type) => [Date], { nullable: true })
+  next?: Date[]
 }
 
 @ObjectType({ description: 'user' })
@@ -51,7 +63,7 @@ export class User {
   @Field((type) => String, { nullable: true })
   avatar?: string;
 
-  @Field((type) => Int)
+  @Field((type) => Number)
   createdAt: number;
 
   @Field((type) => String)

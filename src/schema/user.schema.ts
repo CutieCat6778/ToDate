@@ -2,7 +2,7 @@ import * as mongoose from 'mongoose';
 
 export const DateSchema = new mongoose.Schema({
   _id: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
     default: new mongoose.Types.ObjectId(),
   },
 
@@ -17,8 +17,13 @@ export const DateSchema = new mongoose.Schema({
     required: true,
   },
 
-  time: {
+  location: {
     type: String,
+    required: true,
+  },
+
+  time: {
+    type: Number,
     required: true,
   },
 
@@ -64,7 +69,7 @@ export const DateSchema = new mongoose.Schema({
 
 export const UserSchema = new mongoose.Schema({
   _id: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
     default: new mongoose.Types.ObjectId(),
   },
 
@@ -121,11 +126,9 @@ export const UserSchema = new mongoose.Schema({
   dates: {
     type: [
       {
-        postId: {
-          type: mongoose.Schema.Types.ObjectId,
-          required: true,
-          ref: "Date"
-        },
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        ref: "Date"
       },
     ],
     default: [],

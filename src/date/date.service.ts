@@ -8,6 +8,7 @@ import {
   RemoveDateInput,
   UpdateDateInput,
 } from 'src/dto/date.input';
+import e from 'express';
 
 @Injectable()
 export class DateService {
@@ -45,16 +46,28 @@ export class DateService {
     }
 
     const dates = [];
+    const next = [];
     const currentDate = new Date().getTime();
 
     for (const id of user.dates) {
-      const date = await this.dateModel.findOne({ _id: id });
+      const date = await this.dateModel.findOne({ _id: id.toString() });
+      console.log(date, currentDate > date.expireIn);
       if (currentDate > date.expireIn)
         this.removeDate({ username: args.username, id: id.toString() });
-      else return dates.push(date);
+      else if((currentDate + 1000 * 60 * 60 * 24 ) < date.expireIn && currentDate > date.createdAt) {
+        next.push(date);
+      }
+      else if((currentDate + 1000 * 60 * 60 * 24 ) > date.expireIn && currentDate < date.expireIn && currentDate > date.createdAt) {
+        dates.push(date);
+      }
     }
 
-    return dates;
+    console.log(dates);
+
+    return {
+      dates,
+      next
+    };
   }
 
   async getDateById(args: GetDateArgs) {

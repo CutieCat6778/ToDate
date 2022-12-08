@@ -29,20 +29,29 @@ export class AuthService {
       throw new ForbiddenException('Access Denied');
     }
 
-    const refreshTokenMatches = await ValidatePassword(
+    console.log(refreshToken)
+
+    const refreshTokenMatches = ValidatePassword(
       refreshToken,
       user.salt,
       user.refreshToken,
     );
+
+    console.log(refreshTokenMatches);
+
     if (!refreshTokenMatches) {
       throw new ForbiddenException('Access Denied');
     }
     const tokens = await this.getTokens(user.id, user.username);
-    await this.updateRefreshToken(user.id, tokens.refreshToken, user.salt);
+
+    console.log(tokens.refreshToken);
+
+    //await this.updateRefreshToken(user.id, tokens.refreshToken, user.salt);
     return tokens;
   }
 
   async updateRefreshToken(userId: string, refreshToken: string, salt: string) {
+    console.log("Updated Refresh token", refreshToken);
     const hashedRefreshToken = HashRefreshToken(refreshToken, salt);
     return this.userService.updateOne(
       { _id: userId },
@@ -112,6 +121,9 @@ export class AuthService {
 
     const user = res._doc;
     const tokens = await this.getTokens(user._id, user.username);
+
+    console.log(tokens.refreshToken);
+
     await this.updateRefreshToken(user._id, tokens.refreshToken, user.salt);
     if (!user || !tokens || !tokens.accessToken || !tokens.refreshToken)
       return new InternalServerErrorException();
@@ -162,6 +174,7 @@ export class AuthService {
 
       const dto = {
         ...createUser,
+        displayName: createUser.username,
         password: hash,
         salt: salt,
       };

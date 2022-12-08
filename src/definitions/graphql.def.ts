@@ -46,17 +46,24 @@ export class CreateDateInput {
     inviters?: Nullable<string[]>;
     cancelled?: Nullable<boolean>;
     expireIn?: Nullable<number>;
+    location: string;
 }
 
 export class Date {
     _id: number;
     author: string;
     title: string;
+    location: string;
     time: number;
     createdAt: number;
     inviters?: Nullable<string[]>;
     cancelled: boolean;
     expireIn: number;
+}
+
+export class Dates {
+    dates: Date[];
+    next?: Nullable<Date[]>;
 }
 
 export class User {
@@ -108,7 +115,7 @@ export abstract class IQuery {
 
     abstract refreshToken(): Tokens | Promise<Tokens>;
 
-    abstract getDates(username: string, duration?: Nullable<string>): Date[] | Promise<Date[]>;
+    abstract getDates(username: string, duration?: Nullable<string>): Dates | Promise<Dates>;
 
     abstract getDateById(username: string, id: string): Date | Promise<Date>;
 }

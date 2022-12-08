@@ -14,7 +14,7 @@ export class UserResolver {
   constructor(private service: UserService) {}
 
   @UseGuards(GqlAccessTokenAuthGuard, GqlThrottlerGuard)
-  @Throttle(5, 60)
+  // @Throttle(5, 60)
   @Query((returns) => SensoredUser)
   async getUserById(@Args() args: GetUserIdArgs) {
     const user = await this.service.getUserById(args);
@@ -35,7 +35,7 @@ export class UserResolver {
   }
 
   @UseGuards(GqlAccessTokenAuthGuard, GqlThrottlerGuard)
-  @Throttle(5, 60)
+  // @Throttle(5, 60)
   @Query((returns) => SensoredUser)
   async getUserByName(@Args() args: GetUserNameArgs) {
     const user = await this.service.getUserByName(args);
@@ -54,7 +54,7 @@ export class UserResolver {
   }
 
   @UseGuards(GqlAccessTokenAuthGuard, GqlThrottlerGuard)
-  @Throttle(1, 60)
+  // @Throttle(1, 60)
   @Mutation((returns) => User)
   async updateUser(@Args('updateUser') args: UpdateUserArgs) {
     const user = await this.service.updateUser(args);
@@ -67,9 +67,10 @@ export class UserResolver {
   }
 
   @UseGuards(GqlAccessTokenAuthGuard, GqlThrottlerGuard)
-  @Throttle(1, 60)
+  // @Throttle(1, 60)
   @Query((returns) => User)
   async me(@CurrentUser() user: any) {
+    console.log("Get me");
     const res = await this.service.findOne({ _id: user.sub});
     return res;
   }
